@@ -15,7 +15,7 @@ public class EvaluationServiceImpl extends AbstractCrudService<Evaluation, Long,
 
     @Override
     public Evaluation create(Evaluation evaluation) {
-        if (evaluation.getGrade() < 0) {
+        if (evaluation.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Grade cannot be negative");
         }
         return super.create(evaluation);
@@ -23,7 +23,7 @@ public class EvaluationServiceImpl extends AbstractCrudService<Evaluation, Long,
 
     @Override
     public Evaluation update(Long id, Evaluation evaluation) {
-        if (evaluation.getGrade() < 0) {
+        if (evaluation.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
             throw new RuntimeException("Grade cannot be negative");
         }
         return super.update(id, evaluation);

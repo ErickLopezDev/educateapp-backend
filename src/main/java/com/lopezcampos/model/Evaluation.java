@@ -2,6 +2,8 @@ package com.lopezcampos.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -24,7 +26,7 @@ public class Evaluation {
     private LocalDate date;
     
     @Column(name = "grade", precision = 5, scale = 2)
-    private float grade;
+    private BigDecimal grade;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_matriculation", nullable = false)

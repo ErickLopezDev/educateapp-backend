@@ -1,0 +1,26 @@
+package com.lopezcampos.config;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+
+public class ModelMapperConfig {
+
+    private static final ModelMapper mapper = new ModelMapper();
+
+    private ModelMapperConfig() {
+    }
+
+    // (DTO → Entity o Entity → DTO)
+    public static <D, T> D map(final T entity, Class<D> outClass) {
+        return mapper.map(entity, outClass);
+    }
+
+    // List<Entity> → List<DTO>)
+    public static <D, T> List<D> mapList(final List<T> entityList, Class<D> outClass) {
+        return entityList.stream()
+                .map(entity -> map(entity, outClass))
+                .collect(Collectors.toList());
+    }
+}
