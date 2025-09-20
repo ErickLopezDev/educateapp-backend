@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "evaluations")
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,7 +27,6 @@ public class Evaluation {
     @Column(name = "grade", precision = 5, scale = 2)
     private BigDecimal grade;
     
-    // Relationship with Matriculation
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_matriculation", nullable = false)
     private Matriculation matriculation;

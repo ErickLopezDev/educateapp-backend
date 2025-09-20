@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "students")
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -45,7 +45,6 @@ public class Student {
     @Column(name = "status", length = 20)
     private String status;
     
-    // Relationship with Matriculations
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Matriculation> matriculations;
     

@@ -6,7 +6,7 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "schedules")
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -29,7 +29,6 @@ public class Schedule {
     @Column(name = "classroom", length = 50)
     private String classroom;
     
-    // Relationship with Course
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_course", nullable = false)
     private Course course;

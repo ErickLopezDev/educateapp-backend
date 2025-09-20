@@ -6,7 +6,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "courses")
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -28,17 +28,14 @@ public class Course {
     
     @Column(name = "semester")
     private Integer semester;
-    
-    // Relationship with Teacher
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_teacher", nullable = false)
     private Teacher teacher;
     
-    // Relationship with Schedules
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Schedule> schedules;
     
-    // Relationship with Matriculations
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Matriculation> matriculations;
     

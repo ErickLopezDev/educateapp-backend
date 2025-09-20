@@ -7,7 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "matriculations")
-@Data
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -27,17 +27,14 @@ public class Matriculation {
     @Column(name = "matriculation_status", length = 20)
     private String matriculationStatus;
     
-    // Relationship with Student
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_student", nullable = false)
     private Student student;
     
-    // Relationship with Course
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_course", nullable = false)
     private Course course;
     
-    // Relationship with Evaluations
     @OneToMany(mappedBy = "matriculation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Evaluation> evaluations;
     
