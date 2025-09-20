@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class StudentController {
 
-    private StudentService studentService;
+    private final StudentService studentService;
 
     @GetMapping
     @Operation(summary = "Get all students", description = "Retrieve a list of all students")

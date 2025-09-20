@@ -24,8 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class EvaluationController {
 
-    private EvaluationService evaluationService;
-    private MatriculationService matriculationService;
+    private final EvaluationService evaluationService;
+    private final MatriculationService matriculationService;
 
     @GetMapping
     @Operation(summary = "Get all evaluations", description = "Retrieve a list of all evaluations")
