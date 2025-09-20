@@ -24,8 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CourseController {
 
-    private CourseService courseService;
-    private TeacherService teacherService;
+    private final CourseService courseService;
+    private final TeacherService teacherService;
 
     @GetMapping
     @Operation(summary = "Get all courses", description = "Retrieve a list of all courses")

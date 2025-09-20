@@ -26,9 +26,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MatriculationController {
 
-    private MatriculationService matriculationService;
-    private StudentService studentService;
-    private CourseService courseService;
+    private final MatriculationService matriculationService;
+    private final StudentService studentService;
+    private final CourseService courseService;
 
     @GetMapping
     @Operation(summary = "Get all matriculations", description = "Retrieve a list of all matriculations")

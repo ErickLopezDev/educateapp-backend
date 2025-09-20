@@ -24,8 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor    
 public class ScheduleController {
 
-    private ScheduleService scheduleService;
-    private CourseService courseService;
+    private final ScheduleService scheduleService;
+    private final CourseService courseService;
 
     @GetMapping
     @Operation(summary = "Get all schedules", description = "Retrieve a list of all schedules")
