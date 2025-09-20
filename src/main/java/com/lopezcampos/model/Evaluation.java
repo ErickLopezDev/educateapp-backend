@@ -25,7 +25,7 @@ public class Evaluation {
     private LocalDate date;
     
     @Column(name = "grade", precision = 5, scale = 2)
-    private BigDecimal grade;
+    private float grade;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_matriculation", nullable = false)
