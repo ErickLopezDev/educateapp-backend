@@ -9,11 +9,8 @@ import com.lopezcampos.service.interface_.MatriculationService;
 @Service
 public class MatriculationServiceImpl extends AbstractCrudService<Matriculation, Long, MatriculationRepository> implements MatriculationService {
 
-    private final MatriculationRepository matriculationRepository;
-
     public MatriculationServiceImpl(MatriculationRepository matriculationRepository) {
         super(matriculationRepository);
-        this.matriculationRepository = matriculationRepository;
     }
 
     @Override

@@ -9,11 +9,8 @@ import com.lopezcampos.service.interface_.EvaluationService;
 @Service
 public class EvaluationServiceImpl extends AbstractCrudService<Evaluation, Long, EvaluationRepository> implements EvaluationService {
 
-    private final EvaluationRepository evaluationRepository;
-
     public EvaluationServiceImpl(EvaluationRepository evaluationRepository) {
         super(evaluationRepository);
-        this.evaluationRepository = evaluationRepository;
     }
 
     @Override

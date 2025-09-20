@@ -8,10 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ScheduleServiceImpl extends AbstractCrudService<Schedule, Long, ScheduleRepository> implements ScheduleService {
 
-    private final ScheduleRepository scheduleRepository;
-
     public ScheduleServiceImpl(ScheduleRepository scheduleRepository) {
         super(scheduleRepository);
-        this.scheduleRepository = scheduleRepository;
     }
 }

@@ -9,11 +9,8 @@ import com.lopezcampos.service.interface_.StudentService;
 @Service
 public class StudentServiceImpl extends AbstractCrudService<Student, Long, StudentRepository> implements StudentService {
 
-    private final StudentRepository studentRepository;
-
     public StudentServiceImpl(StudentRepository studentRepository) {
         super(studentRepository);
-        this.studentRepository = studentRepository;
     }
 
     @Override
