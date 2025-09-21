@@ -30,23 +30,57 @@ public class MatriculationServiceImpl
     }
 
     @Override
-public MatriculationResponseDto create(MatriculationRequestDto requestDto) {
-    // Construir manualmente la entidad
-    Matriculation matriculation = new Matriculation();
-    matriculation.setAcademicPeriod(requestDto.getAcademicPeriod());
-    matriculation.setMatriculationDate(requestDto.getMatriculationDate());
-    matriculation.setMatriculationStatus(requestDto.getMatriculationStatus());
+    public MatriculationResponseDto create(MatriculationRequestDto requestDto) {
 
-    Student student = studentRepository.findById(requestDto.getStudentId())
-            .orElseThrow(() -> new NotFoundException("Student not found with id " + requestDto.getStudentId()));
-    Course course = courseRepository.findById(requestDto.getCourseId())
-            .orElseThrow(() -> new NotFoundException("Course not found with id " + requestDto.getCourseId()));
+        Matriculation matriculation = new Matriculation();
+        matriculation.setAcademicPeriod(requestDto.getAcademicPeriod());
+        matriculation.setMatriculationDate(requestDto.getMatriculationDate());
+        matriculation.setMatriculationStatus(requestDto.getMatriculationStatus());
 
-    matriculation.setStudent(student);
-    matriculation.setCourse(course);
+        Student student = studentRepository.findById(requestDto.getStudentId())
+                .orElseThrow(() -> new NotFoundException("Student not found with id " + requestDto.getStudentId()));
+        Course course = courseRepository.findById(requestDto.getCourseId())
+                .orElseThrow(() -> new NotFoundException("Course not found with id " + requestDto.getCourseId()));
 
-    Matriculation saved = repository.save(matriculation);
-    return ModelMapperConfig.map(saved, MatriculationResponseDto.class);
-}
+        matriculation.setStudent(student);
+        matriculation.setCourse(course);
 
+        Matriculation saved = repository.save(matriculation);
+
+        return buildResponseDto(saved);
+    }
+
+    @Override
+    public MatriculationResponseDto update(Long id, MatriculationRequestDto requestDto) {
+
+        Matriculation existing = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Matriculation not found with id " + id));
+
+        existing.setAcademicPeriod(requestDto.getAcademicPeriod());
+        existing.setMatriculationDate(requestDto.getMatriculationDate());
+        existing.setMatriculationStatus(requestDto.getMatriculationStatus());
+
+        Student student = studentRepository.findById(requestDto.getStudentId())
+                .orElseThrow(() -> new NotFoundException("Student not found with id " + requestDto.getStudentId()));
+        Course course = courseRepository.findById(requestDto.getCourseId())
+                .orElseThrow(() -> new NotFoundException("Course not found with id " + requestDto.getCourseId()));
+
+        existing.setStudent(student);
+        existing.setCourse(course);
+
+        Matriculation saved = repository.save(existing);
+
+        return buildResponseDto(saved);
+    }
+
+    private MatriculationResponseDto buildResponseDto(Matriculation matriculation) {
+        MatriculationResponseDto dto = ModelMapperConfig.map(matriculation, MatriculationResponseDto.class);
+
+        dto.setStudentName(matriculation.getStudent().getName());
+        dto.setStudentSurname(matriculation.getStudent().getSurname());
+        dto.setCourseName(matriculation.getCourse().getName());
+        dto.setCourseCode(matriculation.getCourse().getCode());
+
+        return dto;
+    }
 }
