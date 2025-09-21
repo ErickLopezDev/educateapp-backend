@@ -2,7 +2,6 @@ package com.lopezcampos.service.impl;
 
 import org.springframework.stereotype.Service;
 
-import com.lopezcampos.dto.MatriculationDto;
 import com.lopezcampos.dto.request.MatriculationRequestDto;
 import com.lopezcampos.dto.response.MatriculationResponseDto;
 import com.lopezcampos.exception.matriculations.InvalidAcademicPeriodException;
