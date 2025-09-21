@@ -7,9 +7,9 @@ import com.lopezcampos.exception.base.NotFoundException;
 
 public abstract class AbstractCrudService<
         T,          // Entity
-        ID,         // ID type
-        REQ,        // Request DTO
-        RES,        // Response DTO
+        ID,         // ID 
+        REQ,        // RequestDto
+        RES,        // ResponseDto
         R extends JpaRepository<T, ID>
         > implements CrudService<REQ, RES, ID> {
 

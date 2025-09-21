@@ -24,38 +24,38 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/matriculations")
-@Tag(name = "Matriculations", description = "Matriculation management APIs")
+@Tag(name = "Matriculations")
 @RequiredArgsConstructor
 public class MatriculationController {
 
     private final MatriculationServiceImpl matriculationService;
 
     @GetMapping
-    @Operation(summary = "Get all matriculations", description = "Retrieve a list of all matriculations")
+    @Operation(summary = "Get all matriculations")
     public ResponseEntity<List<MatriculationResponseDto>> getAll() {
         return ResponseEntity.ok(matriculationService.getAll());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get matriculation by ID", description = "Retrieve a specific matriculation by its ID")
+    @Operation(summary = "Get matriculation by ID")
     public ResponseEntity<MatriculationResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(matriculationService.getById(id));
     }
 
     @PostMapping
-    @Operation(summary = "Create a new matriculation", description = "Create a new matriculation with the provided information")
+    @Operation(summary = "Create a new matriculation")
     public ResponseEntity<MatriculationResponseDto> create(@Valid @RequestBody MatriculationRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(matriculationService.create(dto));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update matriculation", description = "Update an existing matriculation with the provided information")
+    @Operation(summary = "Update matriculation")
     public ResponseEntity<MatriculationResponseDto> update(@PathVariable Long id, @Valid @RequestBody MatriculationRequestDto dto) {
         return ResponseEntity.ok(matriculationService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete matriculation", description = "Delete a matriculation by its ID")
+    @Operation(summary = "Delete matriculation")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         matriculationService.delete(id);
         return ResponseEntity.noContent().build();

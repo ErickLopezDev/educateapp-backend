@@ -24,38 +24,38 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/schedules")
-@Tag(name = "Schedules", description = "Schedule management APIs")
+@Tag(name = "Schedules")
 @RequiredArgsConstructor
 public class ScheduleController {
 
     private final ScheduleServiceImpl scheduleService;
 
     @GetMapping
-    @Operation(summary = "Get all schedules", description = "Retrieve a list of all schedules")
+    @Operation(summary = "Get all schedules")
     public ResponseEntity<List<ScheduleResponseDto>> getAll() {
         return ResponseEntity.ok(scheduleService.getAll());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get schedule by ID", description = "Retrieve a specific schedule by its ID")
+    @Operation(summary = "Get schedule by ID")
     public ResponseEntity<ScheduleResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(scheduleService.getById(id));
     }
 
     @PostMapping
-    @Operation(summary = "Create a new schedule", description = "Create a new schedule with the provided information")
+    @Operation(summary = "Create a new schedule")
     public ResponseEntity<ScheduleResponseDto> create(@Valid @RequestBody ScheduleRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(dto));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update schedule", description = "Update an existing schedule with the provided information")
+    @Operation(summary = "Update schedule")
     public ResponseEntity<ScheduleResponseDto> update(@PathVariable Long id, @Valid @RequestBody ScheduleRequestDto dto) {
         return ResponseEntity.ok(scheduleService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete schedule", description = "Delete a schedule by its ID")
+    @Operation(summary = "Delete schedule")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         scheduleService.delete(id);
         return ResponseEntity.noContent().build();

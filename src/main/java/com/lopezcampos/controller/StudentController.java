@@ -24,38 +24,38 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/students")
-@Tag(name = "Students", description = "Student management APIs")
+@Tag(name = "Students")
 @RequiredArgsConstructor
 public class StudentController {
 
     private final StudentServiceImpl studentService;
 
     @GetMapping
-    @Operation(summary = "Get all students", description = "Retrieve a list of all students")
+    @Operation(summary = "Get all students")
     public ResponseEntity<List<StudentResponseDto>> getAll() {
         return ResponseEntity.ok(studentService.getAll());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get student by ID", description = "Retrieve a specific student by their ID")
+    @Operation(summary = "Get student by ID")
     public ResponseEntity<StudentResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(studentService.getById(id));
     }
 
     @PostMapping
-    @Operation(summary = "Create a new student", description = "Create a new student with the provided information")
+    @Operation(summary = "Create a new student")
     public ResponseEntity<StudentResponseDto> create(@Valid @RequestBody StudentRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(studentService.create(dto));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update student", description = "Update an existing student with the provided information")
+    @Operation(summary = "Update student")
     public ResponseEntity<StudentResponseDto> update(@PathVariable Long id, @Valid @RequestBody StudentRequestDto dto) {
         return ResponseEntity.ok(studentService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete student", description = "Delete a student by their ID")
+    @Operation(summary = "Delete student")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         studentService.delete(id);
         return ResponseEntity.noContent().build();
