@@ -9,8 +9,10 @@ import com.lopezcampos.dto.request.EvaluationRequestDto;
 import com.lopezcampos.dto.response.EvaluationResponseDto;
 import com.lopezcampos.exception.base.NotFoundException;
 import com.lopezcampos.exception.evaluations.NegativeGradeException;
+import com.lopezcampos.model.Course;
 import com.lopezcampos.model.Evaluation;
 import com.lopezcampos.model.Matriculation;
+import com.lopezcampos.model.Student;
 import com.lopezcampos.repository.EvaluationRepository;
 import com.lopezcampos.repository.MatriculationRepository;
 import com.lopezcampos.service.interface_.AbstractCrudService;
@@ -39,19 +41,48 @@ public class EvaluationServiceImpl
         evaluation.setMatriculation(matriculation);
 
         Evaluation saved = repository.save(evaluation);
+        return buildResponse(saved);
+    }
 
+    @Override
+    public EvaluationResponseDto update(Long id, EvaluationRequestDto requestDto) {
+        Evaluation evaluation = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Evaluation not found with id " + id));
+
+        evaluation.setTypeEvaluation(requestDto.getTypeEvaluation());
+        evaluation.setDate(requestDto.getDate());
+        evaluation.setGrade(requestDto.getGrade());
+
+        Matriculation matriculation = matriculationRepository.findById(requestDto.getMatriculationId())
+                .orElseThrow(() -> new NotFoundException("Matriculation not found with id " + requestDto.getMatriculationId()));
+        evaluation.setMatriculation(matriculation);
+
+        Evaluation updated = repository.save(evaluation);
+        return buildResponse(updated);
+    }
+
+    private EvaluationResponseDto buildResponse(Evaluation evaluation) {
         EvaluationResponseDto dto = new EvaluationResponseDto();
-        dto.setIdEvaluation(saved.getIdEvaluation());
-        dto.setTypeEvaluation(saved.getTypeEvaluation());
-        dto.setDate(saved.getDate());
-        dto.setGrade(saved.getGrade());
+        dto.setIdEvaluation(evaluation.getIdEvaluation());
+        dto.setTypeEvaluation(evaluation.getTypeEvaluation());
+        dto.setDate(evaluation.getDate());
+        dto.setGrade(evaluation.getGrade());
 
-        dto.setStudentName(saved.getMatriculation().getStudent().getName());
-        dto.setStudentSurname(saved.getMatriculation().getStudent().getSurname());
-        dto.setCourseName(saved.getMatriculation().getCourse().getName());
-        dto.setCourseCode(saved.getMatriculation().getCourse().getCode());
+        if (evaluation.getMatriculation() != null) {
+            Student student = evaluation.getMatriculation().getStudent();
+            Course course = evaluation.getMatriculation().getCourse();
 
+            if (student != null) {
+                dto.setStudentName(student.getName());
+                dto.setStudentSurname(student.getSurname());
+            }
+            if (course != null) {
+                dto.setCourseName(course.getName());
+                dto.setCourseCode(course.getCode());
+            }
+        }
         return dto;
     }
+
 
 }
