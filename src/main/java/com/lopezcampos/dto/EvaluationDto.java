@@ -26,7 +26,6 @@ public class EvaluationDto {
     @NotNull(message = "Matriculation ID is required")
     private Long matriculationId;
     
-    // Additional fields for display purposes
     private String studentName;
     private String studentSurname;
     private String courseName;

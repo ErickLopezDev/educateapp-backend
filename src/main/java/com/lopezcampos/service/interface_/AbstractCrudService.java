@@ -48,7 +48,7 @@ public abstract class AbstractCrudService<
             throw new NotFoundException("Entity not found with id " + id);
         }
         T entity = ModelMapperConfig.map(requestDto, entityClass);
-        // OJO: podrías querer setear manualmente el ID en el entity
+        
         return ModelMapperConfig.map(repository.save(entity), responseClass);
     }
 

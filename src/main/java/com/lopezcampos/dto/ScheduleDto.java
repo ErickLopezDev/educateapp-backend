@@ -28,7 +28,6 @@ public class ScheduleDto {
     @NotNull(message = "Course ID is required")
     private Long courseId;
     
-    // Additional fields for display purposes
     private String courseName;
     private String courseCode;
 }

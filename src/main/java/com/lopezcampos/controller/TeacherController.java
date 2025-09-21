@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lopezcampos.dto.TeacherDto;
 import com.lopezcampos.dto.request.TeacherRequestDto;
 import com.lopezcampos.dto.response.TeacherResponseDto;
 import com.lopezcampos.service.impl.TeacherServiceImpl;
