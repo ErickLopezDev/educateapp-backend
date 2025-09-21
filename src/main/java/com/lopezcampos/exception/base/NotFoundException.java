@@ -1,4 +1,4 @@
-package com.lopezcampos.exception;
+package com.lopezcampos.exception.base;
 
 import lombok.Getter;
 
