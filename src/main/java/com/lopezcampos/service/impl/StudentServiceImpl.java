@@ -2,22 +2,23 @@ package com.lopezcampos.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.lopezcampos.dto.StudentDto;
 import com.lopezcampos.model.Student;
 import com.lopezcampos.repository.StudentRepository;
-import com.lopezcampos.service.interface_.StudentService;
 
 @Service
-public class StudentServiceImpl extends AbstractCrudService<Student, Long, StudentRepository> implements StudentService {
+public class StudentServiceImpl
+        extends AbstractCrudService<Student, Long, StudentDto, StudentRepository>{
 
     public StudentServiceImpl(StudentRepository studentRepository) {
-        super(studentRepository);
+        super(studentRepository, Student.class, StudentDto.class);
     }
 
     @Override
-    public Student create(Student student) {
-        if (student.getDni() == null || student.getDni().trim().isEmpty()) {
+    public StudentDto create(StudentDto dto) {
+        if (dto.getDni() == null || dto.getDni().trim().isEmpty()) {
             throw new RuntimeException("DNI is required");
         }
-        return super.create(student);
+        return super.create(dto);
     }
 }

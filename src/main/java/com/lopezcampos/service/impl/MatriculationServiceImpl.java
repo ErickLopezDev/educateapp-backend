@@ -2,32 +2,33 @@ package com.lopezcampos.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.lopezcampos.dto.MatriculationDto;
 import com.lopezcampos.exception.matriculations.InvalidAcademicPeriodException;
 import com.lopezcampos.model.Matriculation;
 import com.lopezcampos.repository.MatriculationRepository;
-import com.lopezcampos.service.interface_.MatriculationService;
 
 @Service
-public class MatriculationServiceImpl extends AbstractCrudService<Matriculation, Long, MatriculationRepository> implements MatriculationService {
+public class MatriculationServiceImpl
+        extends AbstractCrudService<Matriculation, Long, MatriculationDto, MatriculationRepository>{
 
     public MatriculationServiceImpl(MatriculationRepository matriculationRepository) {
-        super(matriculationRepository);
+        super(matriculationRepository, Matriculation.class, MatriculationDto.class);
     }
 
     @Override
-    public Matriculation create(Matriculation matriculation) {
-        validateAcademicPeriod(matriculation);
-        return super.create(matriculation);
+    public MatriculationDto create(MatriculationDto dto) {
+        validateAcademicPeriod(dto);
+        return super.create(dto);
     }
 
     @Override
-    public Matriculation update(Long id, Matriculation matriculation) {
-        validateAcademicPeriod(matriculation);
-        return super.update(id, matriculation);
+    public MatriculationDto update(Long id, MatriculationDto dto) {
+        validateAcademicPeriod(dto);
+        return super.update(id, dto);
     }
 
-    private void validateAcademicPeriod(Matriculation matriculation) {
-        if (matriculation.getAcademicPeriod() == null || matriculation.getAcademicPeriod().trim().isEmpty()) {
+    private void validateAcademicPeriod(MatriculationDto dto) {
+        if (dto.getAcademicPeriod() == null || dto.getAcademicPeriod().trim().isEmpty()) {
             throw new InvalidAcademicPeriodException("Academic period is required");
         }
     }

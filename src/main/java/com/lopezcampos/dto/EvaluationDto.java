@@ -1,6 +1,8 @@
 package com.lopezcampos.dto;
 
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import jakarta.validation.constraints.*;
 
@@ -19,7 +21,7 @@ public class EvaluationDto {
     
     @DecimalMin(value = "0.0", message = "Grade must be at least 0.0")
     @DecimalMax(value = "20.0", message = "Grade must not exceed 20.0")
-    private float grade;
+    private BigDecimal grade;
     
     @NotNull(message = "Matriculation ID is required")
     private Long matriculationId;

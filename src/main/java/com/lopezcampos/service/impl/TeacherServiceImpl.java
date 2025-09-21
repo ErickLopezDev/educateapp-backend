@@ -2,14 +2,15 @@ package com.lopezcampos.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.lopezcampos.dto.TeacherDto;
 import com.lopezcampos.model.Teacher;
 import com.lopezcampos.repository.TeacherRepository;
-import com.lopezcampos.service.interface_.TeacherService;
 
 @Service
-public class TeacherServiceImpl extends AbstractCrudService<Teacher, Long, TeacherRepository> implements TeacherService {
+public class TeacherServiceImpl
+        extends AbstractCrudService<Teacher, Long, TeacherDto, TeacherRepository>{
 
     public TeacherServiceImpl(TeacherRepository teacherRepository) {
-        super(teacherRepository);
+        super(teacherRepository, Teacher.class, TeacherDto.class);
     }
 }

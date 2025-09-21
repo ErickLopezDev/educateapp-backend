@@ -1,24 +1,25 @@
 package com.lopezcampos.controller;
 
-import com.lopezcampos.config.ModelMapperConfig;
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.lopezcampos.dto.MatriculationDto;
-import com.lopezcampos.model.Course;
-import com.lopezcampos.model.Matriculation;
-import com.lopezcampos.model.Student;
-import com.lopezcampos.service.interface_.CourseService;
-import com.lopezcampos.service.interface_.MatriculationService;
-import com.lopezcampos.service.interface_.StudentService;
+import com.lopezcampos.service.impl.MatriculationServiceImpl;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/matriculations")
@@ -26,90 +27,36 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MatriculationController {
 
-    private final MatriculationService matriculationService;
-    private final StudentService studentService;
-    private final CourseService courseService;
+    private final MatriculationServiceImpl matriculationService;
 
     @GetMapping
     @Operation(summary = "Get all matriculations", description = "Retrieve a list of all matriculations")
-    public ResponseEntity<List<MatriculationDto>> getAllMatriculations() {
-        List<Matriculation> matriculations = matriculationService.getAll();
-        List<MatriculationDto> matriculationDtos = ModelMapperConfig.mapList(matriculations, MatriculationDto.class);
-        return ResponseEntity.ok(matriculationDtos);
+    public ResponseEntity<List<MatriculationDto>> getAll() {
+        return ResponseEntity.ok(matriculationService.getAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get matriculation by ID", description = "Retrieve a specific matriculation by its ID")
-    public ResponseEntity<MatriculationDto> getMatriculationById(@PathVariable Long id) {
-        Optional<Matriculation> matriculationOpt = matriculationService.getById(id);
-        if (matriculationOpt.isPresent()) {
-            MatriculationDto matriculationDto = ModelMapperConfig.map(matriculationOpt.get(), MatriculationDto.class);
-            return ResponseEntity.ok(matriculationDto);
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<MatriculationDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(matriculationService.getById(id));
     }
 
     @PostMapping
     @Operation(summary = "Create a new matriculation", description = "Create a new matriculation with the provided information")
-    public ResponseEntity<MatriculationDto> createMatriculation(@Valid @RequestBody MatriculationDto matriculationDto) {
-        // Verify student exists
-        Optional<Student> studentOpt = studentService.getById(matriculationDto.getStudentId());
-        if (studentOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        // Verify course exists
-        Optional<Course> courseOpt = courseService.getById(matriculationDto.getCourseId());
-        if (courseOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Matriculation matriculation = ModelMapperConfig.map(matriculationDto, Matriculation.class);
-        matriculation.setStudent(studentOpt.get());
-        matriculation.setCourse(courseOpt.get());
-        
-        Matriculation savedMatriculation = matriculationService.create(matriculation);
-        MatriculationDto savedMatriculationDto = ModelMapperConfig.map(savedMatriculation, MatriculationDto.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedMatriculationDto);
+    public ResponseEntity<MatriculationDto> create(@Valid @RequestBody MatriculationDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(matriculationService.create(dto));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update matriculation", description = "Update an existing matriculation with the provided information")
-    public ResponseEntity<MatriculationDto> updateMatriculation(@PathVariable Long id, @Valid @RequestBody MatriculationDto matriculationDto) {
-        Optional<Matriculation> existingMatriculationOpt = matriculationService.getById(id);
-        if (existingMatriculationOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Verify student exists
-        Optional<Student> studentOpt = studentService.getById(matriculationDto.getStudentId());
-        if (studentOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        // Verify course exists
-        Optional<Course> courseOpt = courseService.getById(matriculationDto.getCourseId());
-        if (courseOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Matriculation matriculation = ModelMapperConfig.map(matriculationDto, Matriculation.class);
-        matriculation.setStudent(studentOpt.get());
-        matriculation.setCourse(courseOpt.get());
-        
-        Matriculation updatedMatriculation = matriculationService.update(id, matriculation);
-        MatriculationDto updatedMatriculationDto = ModelMapperConfig.map(updatedMatriculation, MatriculationDto.class);
-        return ResponseEntity.ok(updatedMatriculationDto);
+    public ResponseEntity<MatriculationDto> update(@PathVariable Long id, @Valid @RequestBody MatriculationDto dto) {
+        return ResponseEntity.ok(matriculationService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete matriculation", description = "Delete a matriculation by its ID")
-    public ResponseEntity<Void> deleteMatriculation(@PathVariable Long id) {
-        Optional<Matriculation> existingMatriculationOpt = matriculationService.getById(id);
-        if (existingMatriculationOpt.isPresent()) {
-            matriculationService.delete(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        matriculationService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

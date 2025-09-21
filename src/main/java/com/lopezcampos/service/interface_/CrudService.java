@@ -1,12 +1,11 @@
 package com.lopezcampos.service.interface_;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface CrudService<T, ID> {
-    T create(T entity);
-    Optional<T> getById(ID id);
-    List<T> getAll();
-    T update(ID id, T entity);
+public interface CrudService<D, ID> {
+    D create(D dto);
+    D getById(ID id);
+    List<D> getAll();
+    D update(ID id, D dto);
     void delete(ID id);
 }

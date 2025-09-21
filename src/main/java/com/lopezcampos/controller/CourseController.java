@@ -1,11 +1,7 @@
 package com.lopezcampos.controller;
 
-import com.lopezcampos.config.ModelMapperConfig;
 import com.lopezcampos.dto.CourseDto;
-import com.lopezcampos.model.Course;
-import com.lopezcampos.model.Teacher;
-import com.lopezcampos.service.interface_.CourseService;
-import com.lopezcampos.service.interface_.TeacherService;
+import com.lopezcampos.service.impl.CourseServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -16,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -24,75 +19,36 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CourseController {
 
-    private final CourseService courseService;
-    private final TeacherService teacherService;
+    private final CourseServiceImpl courseService;
 
     @GetMapping
-    @Operation(summary = "Get all courses", description = "Retrieve a list of all courses")
-    public ResponseEntity<List<CourseDto>> getAllCourses() {
-        List<Course> courses = courseService.getAll();
-        List<CourseDto> courseDtos = ModelMapperConfig.mapList(courses, CourseDto.class);
-        return ResponseEntity.ok(courseDtos);
+    @Operation(summary = "Get all courses", description = "Retrieve a list of all available courses")    
+    public ResponseEntity<List<CourseDto>> getAll() {
+        return ResponseEntity.ok(courseService.getAll());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get course by ID", description = "Retrieve a specific course by its ID")
-    public ResponseEntity<CourseDto> getCourseById(@PathVariable Long id) {
-        Optional<Course> courseOpt = courseService.getById(id);
-        if (courseOpt.isPresent()) {
-            CourseDto courseDto = ModelMapperConfig.map(courseOpt.get(), CourseDto.class);
-            return ResponseEntity.ok(courseDto);
-        }
-        return ResponseEntity.notFound().build();
+    @Operation(summary = "Get course by ID", description = "Retrieve details of a course by its ID")
+    public ResponseEntity<CourseDto> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(courseService.getById(id));
     }
 
     @PostMapping
-    @Operation(summary = "Create a new course", description = "Create a new course with the provided information")
-    public ResponseEntity<CourseDto> createCourse(@Valid @RequestBody CourseDto courseDto) {
-        // Verify teacher exists
-        Optional<Teacher> teacherOpt = teacherService.getById(courseDto.getTeacherId());
-        if (teacherOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Course course = ModelMapperConfig.map(courseDto, Course.class);
-        course.setTeacher(teacherOpt.get());
-        
-        Course savedCourse = courseService.create(course);
-        CourseDto savedCourseDto = ModelMapperConfig.map(savedCourse, CourseDto.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCourseDto);
+    @Operation(summary = "Create a new course", description = "Add a new course to the system")
+    public ResponseEntity<CourseDto> create(@Valid @RequestBody CourseDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(courseService.create(dto));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update course", description = "Update an existing course with the provided information")
-    public ResponseEntity<CourseDto> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseDto courseDto) {
-        Optional<Course> existingCourseOpt = courseService.getById(id);
-        if (existingCourseOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Verify teacher exists
-        Optional<Teacher> teacherOpt = teacherService.getById(courseDto.getTeacherId());
-        if (teacherOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        Course course = ModelMapperConfig.map(courseDto, Course.class);
-        course.setTeacher(teacherOpt.get());
-        
-        Course updatedCourse = courseService.update(id, course);
-        CourseDto updatedCourseDto = ModelMapperConfig.map(updatedCourse, CourseDto.class);
-        return ResponseEntity.ok(updatedCourseDto);
+    @Operation(summary = "Update an existing course", description = "Update the details of a course by its ID")
+    public ResponseEntity<CourseDto> update(@PathVariable Long id, @Valid @RequestBody CourseDto dto) {
+        return ResponseEntity.ok(courseService.update(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete course", description = "Delete a course by its ID")
-    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
-        Optional<Course> existingCourseOpt = courseService.getById(id);
-        if (existingCourseOpt.isPresent()) {
-            courseService.delete(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    @Operation(summary = "Delete course by ID", description = "Remove a course from the system by its ID")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        courseService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

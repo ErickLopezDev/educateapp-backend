@@ -2,31 +2,32 @@ package com.lopezcampos.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.lopezcampos.dto.EvaluationDto;
 import com.lopezcampos.exception.evaluations.NegativeGradeException;
 import com.lopezcampos.model.Evaluation;
 import com.lopezcampos.repository.EvaluationRepository;
-import com.lopezcampos.service.interface_.EvaluationService;
 
 @Service
-public class EvaluationServiceImpl extends AbstractCrudService<Evaluation, Long, EvaluationRepository> implements EvaluationService {
+public class EvaluationServiceImpl 
+        extends AbstractCrudService<Evaluation, Long, EvaluationDto, EvaluationRepository>{
 
     public EvaluationServiceImpl(EvaluationRepository evaluationRepository) {
-        super(evaluationRepository);
+        super(evaluationRepository, Evaluation.class, EvaluationDto.class);
     }
 
     @Override
-    public Evaluation create(Evaluation evaluation) {
-        if (evaluation.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
+    public EvaluationDto create(EvaluationDto evaluationDto) {
+        if (evaluationDto.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
             throw new NegativeGradeException();
         }
-        return super.create(evaluation);
+        return super.create(evaluationDto); // ahora devuelve DTO
     }
 
     @Override
-    public Evaluation update(Long id, Evaluation evaluation) {
-        if (evaluation.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
+    public EvaluationDto update(Long id, EvaluationDto evaluationDto) {
+        if (evaluationDto.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
             throw new NegativeGradeException();
         }
-        return super.update(id, evaluation);
+        return super.update(id, evaluationDto);
     }
 }

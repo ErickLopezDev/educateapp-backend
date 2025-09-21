@@ -1,60 +1,57 @@
 package com.lopezcampos.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.lopezcampos.config.ModelMapperConfig;
 import com.lopezcampos.exception.base.NotFoundException;
 import com.lopezcampos.service.interface_.CrudService;
 
-public abstract class AbstractCrudService<T, ID, R extends JpaRepository<T, ID>> implements CrudService<T, ID> {
+public abstract class AbstractCrudService<
+        T,
+        ID,
+        D,
+        R extends JpaRepository<T, ID>
+        > implements CrudService<D, ID>{
 
     protected final R repository;
+    private final Class<T> entityClass;
+    private final Class<D> dtoClass;
 
-    protected AbstractCrudService(R repository) {
+    protected AbstractCrudService(R repository, Class<T> entityClass, Class<D> dtoClass) {
         this.repository = repository;
+        this.entityClass = entityClass;
+        this.dtoClass = dtoClass;
     }
 
-    @Override
-    public T create(T entity) {
-        return repository.save(entity);
+    public D create(D dto) {
+        T entity = ModelMapperConfig.map(dto, entityClass);
+        return ModelMapperConfig.map(repository.save(entity), dtoClass);
     }
 
-    @Override
-    public Optional<T> getById(ID id) {
-        if (id == null) {
-            throw new IllegalArgumentException("ID must not be null");
-        }
-        return Optional.ofNullable(repository.findById(id).orElseThrow(() -> 
-            new NotFoundException("Entity with ID " + id + " not found")));
+    public D getById(ID id) {
+        T entity = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Entity not found with id " + id));
+        return ModelMapperConfig.map(entity, dtoClass);
     }
 
-    @Override
-    public List<T> getAll() {
-        return repository.findAll();
+    public List<D> getAll() {
+        return ModelMapperConfig.mapList(repository.findAll(), dtoClass);
     }
 
-    @Override
-    public T update(ID id, T entity) {
-        if (id == null) {
-            throw new IllegalArgumentException("ID must not be null");
-        }
+    public D update(ID id, D dto) {
         if (!repository.existsById(id)) {
-            throw new NotFoundException("Entity with ID " + id + " not found");
+            throw new NotFoundException("Entity not found with id " + id);
         }
-        return repository.save(entity);
+        T entity = ModelMapperConfig.map(dto, entityClass);
+        return ModelMapperConfig.map(repository.save(entity), dtoClass);
     }
 
-    @Override
     public void delete(ID id) {
-        if (id == null) {
-            throw new IllegalArgumentException("ID must not be null");
-        }
         if (!repository.existsById(id)) {
-            throw new NotFoundException("Entity with ID " + id + " not found");
+            throw new NotFoundException("Entity not found with id " + id);
         }
         repository.deleteById(id);
     }
 }
-
