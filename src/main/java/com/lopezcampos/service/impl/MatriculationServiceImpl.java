@@ -2,6 +2,7 @@ package com.lopezcampos.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.lopezcampos.exception.matriculations.InvalidAcademicPeriodException;
 import com.lopezcampos.model.Matriculation;
 import com.lopezcampos.repository.MatriculationRepository;
 import com.lopezcampos.service.interface_.MatriculationService;
@@ -15,17 +16,19 @@ public class MatriculationServiceImpl extends AbstractCrudService<Matriculation,
 
     @Override
     public Matriculation create(Matriculation matriculation) {
-        if (matriculation.getAcademicPeriod() == null || matriculation.getAcademicPeriod().trim().isEmpty()) {
-            throw new RuntimeException("Academic period is required");
-        }
+        validateAcademicPeriod(matriculation);
         return super.create(matriculation);
     }
 
     @Override
     public Matriculation update(Long id, Matriculation matriculation) {
-        if (matriculation.getAcademicPeriod() == null || matriculation.getAcademicPeriod().trim().isEmpty()) {
-            throw new RuntimeException("Academic period is required");
-        }
+        validateAcademicPeriod(matriculation);
         return super.update(id, matriculation);
+    }
+
+    private void validateAcademicPeriod(Matriculation matriculation) {
+        if (matriculation.getAcademicPeriod() == null || matriculation.getAcademicPeriod().trim().isEmpty()) {
+            throw new InvalidAcademicPeriodException("Academic period is required");
+        }
     }
 }

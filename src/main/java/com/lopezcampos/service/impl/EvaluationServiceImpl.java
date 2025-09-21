@@ -2,6 +2,7 @@ package com.lopezcampos.service.impl;
 
 import org.springframework.stereotype.Service;
 
+import com.lopezcampos.exception.evaluations.NegativeGradeException;
 import com.lopezcampos.model.Evaluation;
 import com.lopezcampos.repository.EvaluationRepository;
 import com.lopezcampos.service.interface_.EvaluationService;
@@ -16,7 +17,7 @@ public class EvaluationServiceImpl extends AbstractCrudService<Evaluation, Long,
     @Override
     public Evaluation create(Evaluation evaluation) {
         if (evaluation.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("Grade cannot be negative");
+            throw new NegativeGradeException();
         }
         return super.create(evaluation);
     }
@@ -24,7 +25,7 @@ public class EvaluationServiceImpl extends AbstractCrudService<Evaluation, Long,
     @Override
     public Evaluation update(Long id, Evaluation evaluation) {
         if (evaluation.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("Grade cannot be negative");
+            throw new NegativeGradeException();
         }
         return super.update(id, evaluation);
     }

@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.lopezcampos.exception.base.NotFoundException;
 import com.lopezcampos.service.interface_.CrudService;
 
 public abstract class AbstractCrudService<T, ID, R extends JpaRepository<T, ID>> implements CrudService<T, ID> {
@@ -26,7 +27,7 @@ public abstract class AbstractCrudService<T, ID, R extends JpaRepository<T, ID>>
             throw new IllegalArgumentException("ID must not be null");
         }
         return Optional.ofNullable(repository.findById(id).orElseThrow(() -> 
-            new RuntimeArgumentException("Entity with ID " + id + " not found")));
+            new NotFoundException("Entity with ID " + id + " not found")));
     }
 
     @Override
@@ -40,7 +41,7 @@ public abstract class AbstractCrudService<T, ID, R extends JpaRepository<T, ID>>
             throw new IllegalArgumentException("ID must not be null");
         }
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Entity with ID " + id + " not found");
+            throw new NotFoundException("Entity with ID " + id + " not found");
         }
         return repository.save(entity);
     }
@@ -51,15 +52,9 @@ public abstract class AbstractCrudService<T, ID, R extends JpaRepository<T, ID>>
             throw new IllegalArgumentException("ID must not be null");
         }
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Entity with ID " + id + " not found");
+            throw new NotFoundException("Entity with ID " + id + " not found");
         }
         repository.deleteById(id);
     }
 }
 
-//TODO: crear exceptions customizados
-class RuntimeArgumentException extends RuntimeException {
-    public RuntimeArgumentException(String message) {
-        super(message);
-    }
-}
