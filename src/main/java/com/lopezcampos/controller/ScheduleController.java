@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.lopezcampos.dto.ScheduleDto;
 import com.lopezcampos.dto.request.ScheduleRequestDto;
 import com.lopezcampos.dto.response.ScheduleResponseDto;
 import com.lopezcampos.service.impl.ScheduleServiceImpl;

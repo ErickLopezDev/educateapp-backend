@@ -1,6 +1,5 @@
 package com.lopezcampos.controller;
 
-import com.lopezcampos.dto.CourseDto;
 import com.lopezcampos.dto.request.CourseRequestDto;
 import com.lopezcampos.dto.response.CourseResponseDto;
 import com.lopezcampos.service.impl.CourseServiceImpl;
