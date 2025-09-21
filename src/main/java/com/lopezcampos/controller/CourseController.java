@@ -1,6 +1,8 @@
 package com.lopezcampos.controller;
 
 import com.lopezcampos.dto.CourseDto;
+import com.lopezcampos.dto.request.CourseRequestDto;
+import com.lopezcampos.dto.response.CourseResponseDto;
 import com.lopezcampos.service.impl.CourseServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,25 +25,25 @@ public class CourseController {
 
     @GetMapping
     @Operation(summary = "Get all courses", description = "Retrieve a list of all available courses")    
-    public ResponseEntity<List<CourseDto>> getAll() {
+    public ResponseEntity<List<CourseResponseDto>> getAll() {
         return ResponseEntity.ok(courseService.getAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get course by ID", description = "Retrieve details of a course by its ID")
-    public ResponseEntity<CourseDto> getById(@PathVariable Long id) {
+    public ResponseEntity<CourseResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(courseService.getById(id));
     }
 
     @PostMapping
     @Operation(summary = "Create a new course", description = "Add a new course to the system")
-    public ResponseEntity<CourseDto> create(@Valid @RequestBody CourseDto dto) {
+    public ResponseEntity<CourseResponseDto> create(@Valid @RequestBody CourseRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(courseService.create(dto));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing course", description = "Update the details of a course by its ID")
-    public ResponseEntity<CourseDto> update(@PathVariable Long id, @Valid @RequestBody CourseDto dto) {
+    public ResponseEntity<CourseResponseDto> update(@PathVariable Long id, @Valid @RequestBody CourseRequestDto dto) {
         return ResponseEntity.ok(courseService.update(id, dto));
     }
 

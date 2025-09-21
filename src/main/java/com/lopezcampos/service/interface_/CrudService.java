@@ -2,10 +2,10 @@ package com.lopezcampos.service.interface_;
 
 import java.util.List;
 
-public interface CrudService<D, ID> {
-    D create(D dto);
-    D getById(ID id);
-    List<D> getAll();
-    D update(ID id, D dto);
+public interface CrudService<REQ, RES, ID> {
+    RES create(REQ requestDto);
+    RES getById(ID id);
+    List<RES> getAll();
+    RES update(ID id, REQ requestDto);
     void delete(ID id);
 }

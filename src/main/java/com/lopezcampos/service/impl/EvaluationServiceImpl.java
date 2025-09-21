@@ -2,32 +2,34 @@ package com.lopezcampos.service.impl;
 
 import org.springframework.stereotype.Service;
 
-import com.lopezcampos.dto.EvaluationDto;
+import com.lopezcampos.dto.request.EvaluationRequestDto;
+import com.lopezcampos.dto.response.EvaluationResponseDto;
 import com.lopezcampos.exception.evaluations.NegativeGradeException;
 import com.lopezcampos.model.Evaluation;
 import com.lopezcampos.repository.EvaluationRepository;
+import com.lopezcampos.service.interface_.AbstractCrudService;
 
 @Service
 public class EvaluationServiceImpl 
-        extends AbstractCrudService<Evaluation, Long, EvaluationDto, EvaluationRepository>{
+        extends AbstractCrudService<Evaluation, Long, EvaluationRequestDto, EvaluationResponseDto, EvaluationRepository> {
 
-    public EvaluationServiceImpl(EvaluationRepository evaluationRepository) {
-        super(evaluationRepository, Evaluation.class, EvaluationDto.class);
+    public EvaluationServiceImpl(EvaluationRepository repository) {
+        super(repository, Evaluation.class, EvaluationResponseDto.class);
     }
 
     @Override
-    public EvaluationDto create(EvaluationDto evaluationDto) {
-        if (evaluationDto.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
+    public EvaluationResponseDto create(EvaluationRequestDto requestDto) {
+        if (requestDto.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
             throw new NegativeGradeException();
         }
-        return super.create(evaluationDto); // ahora devuelve DTO
+        return super.create(requestDto);
     }
 
     @Override
-    public EvaluationDto update(Long id, EvaluationDto evaluationDto) {
-        if (evaluationDto.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
+    public EvaluationResponseDto update(Long id, EvaluationRequestDto requestDto) {
+        if (requestDto.getGrade().compareTo(java.math.BigDecimal.ZERO) < 0) {
             throw new NegativeGradeException();
         }
-        return super.update(id, evaluationDto);
+        return super.update(id, requestDto);
     }
 }

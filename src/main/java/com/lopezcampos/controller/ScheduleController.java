@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lopezcampos.dto.ScheduleDto;
+import com.lopezcampos.dto.request.ScheduleRequestDto;
+import com.lopezcampos.dto.response.ScheduleResponseDto;
 import com.lopezcampos.service.impl.ScheduleServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,25 +33,25 @@ public class ScheduleController {
 
     @GetMapping
     @Operation(summary = "Get all schedules", description = "Retrieve a list of all schedules")
-    public ResponseEntity<List<ScheduleDto>> getAll() {
+    public ResponseEntity<List<ScheduleResponseDto>> getAll() {
         return ResponseEntity.ok(scheduleService.getAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get schedule by ID", description = "Retrieve a specific schedule by its ID")
-    public ResponseEntity<ScheduleDto> getById(@PathVariable Long id) {
+    public ResponseEntity<ScheduleResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(scheduleService.getById(id));
     }
 
     @PostMapping
     @Operation(summary = "Create a new schedule", description = "Create a new schedule with the provided information")
-    public ResponseEntity<ScheduleDto> create(@Valid @RequestBody ScheduleDto dto) {
+    public ResponseEntity<ScheduleResponseDto> create(@Valid @RequestBody ScheduleRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(dto));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update schedule", description = "Update an existing schedule with the provided information")
-    public ResponseEntity<ScheduleDto> update(@PathVariable Long id, @Valid @RequestBody ScheduleDto dto) {
+    public ResponseEntity<ScheduleResponseDto> update(@PathVariable Long id, @Valid @RequestBody ScheduleRequestDto dto) {
         return ResponseEntity.ok(scheduleService.update(id, dto));
     }
 

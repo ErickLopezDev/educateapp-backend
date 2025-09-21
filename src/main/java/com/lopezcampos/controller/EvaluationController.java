@@ -1,21 +1,12 @@
 package com.lopezcampos.controller;
 
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.lopezcampos.dto.EvaluationDto;
+import org.springframework.web.bind.annotation.*;
+import com.lopezcampos.dto.request.EvaluationRequestDto;
+import com.lopezcampos.dto.response.EvaluationResponseDto;
 import com.lopezcampos.service.impl.EvaluationServiceImpl;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,31 +21,34 @@ public class EvaluationController {
     private final EvaluationServiceImpl evaluationService;
 
     @GetMapping
-    @Operation(summary = "Get all evaluations", description = "Retrieve a list of all evaluations")
-    public ResponseEntity<List<EvaluationDto>> getAll() {
+    @Operation(summary = "Get all evaluations")
+    public ResponseEntity<List<EvaluationResponseDto>> getAll() {
         return ResponseEntity.ok(evaluationService.getAll());
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get evaluation by ID", description = "Retrieve a specific evaluation by its ID")
-    public ResponseEntity<EvaluationDto> getById(@PathVariable Long id) {
+    @Operation(summary = "Get evaluation by ID")
+    public ResponseEntity<EvaluationResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(evaluationService.getById(id));
     }
 
     @PostMapping
-    @Operation(summary = "Create a new evaluation", description = "Create a new evaluation with the provided information")
-    public ResponseEntity<EvaluationDto> create(@Valid @RequestBody EvaluationDto dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(evaluationService.create(dto));
+    @Operation(summary = "Create a new evaluation")
+    public ResponseEntity<EvaluationResponseDto> create(@Valid @RequestBody EvaluationRequestDto requestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(evaluationService.create(requestDto));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update evaluation", description = "Update an existing evaluation with the provided information")
-    public ResponseEntity<EvaluationDto> update(@PathVariable Long id, @Valid @RequestBody EvaluationDto dto) {
-        return ResponseEntity.ok(evaluationService.update(id, dto));
+    @Operation(summary = "Update evaluation")
+    public ResponseEntity<EvaluationResponseDto> update(
+            @PathVariable Long id,
+            @Valid @RequestBody EvaluationRequestDto requestDto
+    ) {
+        return ResponseEntity.ok(evaluationService.update(id, requestDto));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete evaluation", description = "Delete an evaluation by its ID")
+    @Operation(summary = "Delete evaluation")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         evaluationService.delete(id);
         return ResponseEntity.noContent().build();

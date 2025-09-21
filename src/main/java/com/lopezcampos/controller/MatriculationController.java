@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lopezcampos.dto.MatriculationDto;
+import com.lopezcampos.dto.request.MatriculationRequestDto;
+import com.lopezcampos.dto.response.MatriculationResponseDto;
 import com.lopezcampos.service.impl.MatriculationServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,25 +33,25 @@ public class MatriculationController {
 
     @GetMapping
     @Operation(summary = "Get all matriculations", description = "Retrieve a list of all matriculations")
-    public ResponseEntity<List<MatriculationDto>> getAll() {
+    public ResponseEntity<List<MatriculationResponseDto>> getAll() {
         return ResponseEntity.ok(matriculationService.getAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get matriculation by ID", description = "Retrieve a specific matriculation by its ID")
-    public ResponseEntity<MatriculationDto> getById(@PathVariable Long id) {
+    public ResponseEntity<MatriculationResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(matriculationService.getById(id));
     }
 
     @PostMapping
     @Operation(summary = "Create a new matriculation", description = "Create a new matriculation with the provided information")
-    public ResponseEntity<MatriculationDto> create(@Valid @RequestBody MatriculationDto dto) {
+    public ResponseEntity<MatriculationResponseDto> create(@Valid @RequestBody MatriculationRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(matriculationService.create(dto));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update matriculation", description = "Update an existing matriculation with the provided information")
-    public ResponseEntity<MatriculationDto> update(@PathVariable Long id, @Valid @RequestBody MatriculationDto dto) {
+    public ResponseEntity<MatriculationResponseDto> update(@PathVariable Long id, @Valid @RequestBody MatriculationRequestDto dto) {
         return ResponseEntity.ok(matriculationService.update(id, dto));
     }
 

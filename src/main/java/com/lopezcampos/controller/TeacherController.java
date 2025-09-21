@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lopezcampos.dto.TeacherDto;
+import com.lopezcampos.dto.request.TeacherRequestDto;
+import com.lopezcampos.dto.response.TeacherResponseDto;
 import com.lopezcampos.service.impl.TeacherServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,25 +33,25 @@ public class TeacherController {
 
     @GetMapping
     @Operation(summary = "Get all teachers", description = "Retrieve a list of all teachers")
-    public ResponseEntity<List<TeacherDto>> getAll() {
+    public ResponseEntity<List<TeacherResponseDto>> getAll() {
         return ResponseEntity.ok(teacherService.getAll());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get teacher by ID", description = "Retrieve a specific teacher by their ID")
-    public ResponseEntity<TeacherDto> getById(@PathVariable Long id) {
+    public ResponseEntity<TeacherResponseDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(teacherService.getById(id));
     }
 
     @PostMapping
     @Operation(summary = "Create a new teacher", description = "Create a new teacher with the provided information")
-    public ResponseEntity<TeacherDto> create(@Valid @RequestBody TeacherDto dto) {
+    public ResponseEntity<TeacherResponseDto> create(@Valid @RequestBody TeacherRequestDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(teacherService.create(dto));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update teacher", description = "Update an existing teacher with the provided information")
-    public ResponseEntity<TeacherDto> update(@PathVariable Long id, @Valid @RequestBody TeacherDto dto) {
+    public ResponseEntity<TeacherResponseDto> update(@PathVariable Long id, @Valid @RequestBody TeacherRequestDto dto) {
         return ResponseEntity.ok(teacherService.update(id, dto));
     }
 
