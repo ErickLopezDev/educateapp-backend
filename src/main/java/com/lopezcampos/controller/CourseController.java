@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +26,35 @@ public class CourseController {
     private final CourseServiceImpl courseService;
 
     @GetMapping
-    @Operation(summary = "Get all courses")    
-    public ResponseEntity<List<CourseResponseDto>> getAll() {
-        return ResponseEntity.ok(courseService.getAll());
+    public ResponseEntity<CollectionModel<EntityModel<CourseResponseDto>>> getAll() {
+        List<CourseResponseDto> list = courseService.getAll();
+
+        List<EntityModel<CourseResponseDto>> items = list.stream()
+            .map(dto -> EntityModel.of(
+                dto,
+                linkTo(methodOn(CourseController.class).getById(dto.getIdCourse())).withSelfRel()
+            ))
+            .toList();
+
+        CollectionModel<EntityModel<CourseResponseDto>> collection = CollectionModel.of(
+            items,
+            linkTo(methodOn(CourseController.class).getAll()).withSelfRel()
+        );
+
+        return ResponseEntity.ok(collection);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get course by ID")
-    public ResponseEntity<CourseResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(courseService.getById(id));
+    public ResponseEntity<EntityModel<CourseResponseDto>> getById(@PathVariable Long id) {
+        CourseResponseDto dto = courseService.getById(id);
+
+        EntityModel<CourseResponseDto> model = EntityModel.of(
+            dto,
+            linkTo(methodOn(CourseController.class).getById(id)).withSelfRel(),
+            linkTo(methodOn(CourseController.class).getAll()).withRel("all")
+        );
+        return ResponseEntity.ok(model);
     }
 
     @PostMapping
