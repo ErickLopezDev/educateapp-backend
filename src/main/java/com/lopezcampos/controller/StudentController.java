@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
 
 import com.lopezcampos.dto.request.StudentRequestDto;
 import com.lopezcampos.dto.response.StudentResponseDto;
@@ -32,14 +36,36 @@ public class StudentController {
 
     @GetMapping
     @Operation(summary = "Get all students")
-    public ResponseEntity<List<StudentResponseDto>> getAll() {
-        return ResponseEntity.ok(studentService.getAll());
+    public ResponseEntity<CollectionModel<EntityModel<StudentResponseDto>>> getAll() {
+        List<StudentResponseDto> list = studentService.getAll();
+
+        List<EntityModel<StudentResponseDto>> items = list.stream()
+            .map(dto -> EntityModel.of(
+                dto,
+                linkTo(methodOn(StudentController.class).getById(dto.getIdStudent())).withSelfRel()
+            ))
+            .toList();
+
+        CollectionModel<EntityModel<StudentResponseDto>> collection = CollectionModel.of(
+            items,
+            linkTo(methodOn(StudentController.class).getAll()).withSelfRel()
+        );
+
+        return ResponseEntity.ok(collection);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get student by ID")
-    public ResponseEntity<StudentResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(studentService.getById(id));
+    public ResponseEntity<EntityModel<StudentResponseDto>> getById(@PathVariable Long id) {
+        StudentResponseDto dto = studentService.getById(id);
+
+        EntityModel<StudentResponseDto> model = EntityModel.of(
+            dto,
+            linkTo(methodOn(StudentController.class).getById(id)).withSelfRel(),
+            linkTo(methodOn(StudentController.class).getAll()).withRel("all")
+        );
+
+        return ResponseEntity.ok(model);
     }
 
     @PostMapping

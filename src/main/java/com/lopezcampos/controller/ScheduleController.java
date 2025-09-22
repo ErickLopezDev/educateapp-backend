@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.lopezcampos.dto.request.ScheduleRequestDto;
 import com.lopezcampos.dto.response.ScheduleResponseDto;
@@ -32,14 +35,36 @@ public class ScheduleController {
 
     @GetMapping
     @Operation(summary = "Get all schedules")
-    public ResponseEntity<List<ScheduleResponseDto>> getAll() {
-        return ResponseEntity.ok(scheduleService.getAll());
+    public ResponseEntity<CollectionModel<EntityModel<ScheduleResponseDto>>> getAll() {
+        List<ScheduleResponseDto> list = scheduleService.getAll();
+
+        List<EntityModel<ScheduleResponseDto>> items = list.stream()
+            .map(dto -> EntityModel.of(
+                dto,
+                linkTo(methodOn(ScheduleController.class).getById(dto.getIdSchedule())).withSelfRel()
+            ))
+            .toList();
+
+        CollectionModel<EntityModel<ScheduleResponseDto>> collection = CollectionModel.of(
+            items,
+            linkTo(methodOn(ScheduleController.class).getAll()).withSelfRel()
+        );
+
+        return ResponseEntity.ok(collection);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get schedule by ID")
-    public ResponseEntity<ScheduleResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(scheduleService.getById(id));
+    public ResponseEntity<EntityModel<ScheduleResponseDto>> getById(@PathVariable Long id) {
+        ScheduleResponseDto dto = scheduleService.getById(id);
+
+        EntityModel<ScheduleResponseDto> model = EntityModel.of(
+            dto,
+            linkTo(methodOn(ScheduleController.class).getById(id)).withSelfRel(),
+            linkTo(methodOn(ScheduleController.class).getAll()).withRel("all")
+        );
+
+        return ResponseEntity.ok(model);
     }
 
     @PostMapping

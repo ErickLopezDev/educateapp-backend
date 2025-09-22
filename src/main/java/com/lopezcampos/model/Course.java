@@ -23,7 +23,7 @@ public class Course {
     @Column(name = "code", unique = true, nullable = false, length = 20)
     private String code;
     
-    @Column(name = "credits")
+    @Column(name = "credits", nullable = false)
     private Integer credits;
     
     @Column(name = "semester")
@@ -38,5 +38,5 @@ public class Course {
     
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Matriculation> matriculations;
-    
+
 }
