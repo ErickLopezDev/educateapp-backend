@@ -46,7 +46,7 @@ public class EvaluationController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping()
     @Operation(summary = "Create a new evaluation", description = "Create a new evaluation with the provided information")
     public ResponseEntity<EvaluationDto> createEvaluation(@Valid @RequestBody EvaluationDto evaluationDto) {
         // Verify matriculation exists
@@ -57,15 +57,16 @@ public class EvaluationController {
 
         Evaluation evaluation = ModelMapperConfig.map(evaluationDto, Evaluation.class);
         evaluation.setMatriculation(matriculationOpt.get());
-        
+
         Evaluation savedEvaluation = evaluationService.create(evaluation);
         EvaluationDto savedEvaluationDto = ModelMapperConfig.map(savedEvaluation, EvaluationDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedEvaluationDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}")
     @Operation(summary = "Update evaluation", description = "Update an existing evaluation with the provided information")
-    public ResponseEntity<EvaluationDto> updateEvaluation(@PathVariable Long id, @Valid @RequestBody EvaluationDto evaluationDto) {
+    public ResponseEntity<EvaluationDto> updateEvaluation(@PathVariable Long id,
+            @Valid @RequestBody EvaluationDto evaluationDto) {
         Optional<Evaluation> existingEvaluationOpt = evaluationService.getById(id);
         if (existingEvaluationOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -79,7 +80,7 @@ public class EvaluationController {
 
         Evaluation evaluation = ModelMapperConfig.map(evaluationDto, Evaluation.class);
         evaluation.setMatriculation(matriculationOpt.get());
-        
+
         Evaluation updatedEvaluation = evaluationService.update(id, evaluation);
         EvaluationDto updatedEvaluationDto = ModelMapperConfig.map(updatedEvaluation, EvaluationDto.class);
         return ResponseEntity.ok(updatedEvaluationDto);

@@ -21,7 +21,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/schedules")
 @Tag(name = "Schedules", description = "Schedule management APIs")
-@RequiredArgsConstructor    
+@RequiredArgsConstructor
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
@@ -46,7 +46,7 @@ public class ScheduleController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping()
     @Operation(summary = "Create a new schedule", description = "Create a new schedule with the provided information")
     public ResponseEntity<ScheduleDto> createSchedule(@Valid @RequestBody ScheduleDto scheduleDto) {
         // Verify course exists
@@ -57,15 +57,16 @@ public class ScheduleController {
 
         Schedule schedule = ModelMapperConfig.map(scheduleDto, Schedule.class);
         schedule.setCourse(courseOpt.get());
-        
+
         Schedule savedSchedule = scheduleService.create(schedule);
         ScheduleDto savedScheduleDto = ModelMapperConfig.map(savedSchedule, ScheduleDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedScheduleDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}")
     @Operation(summary = "Update schedule", description = "Update an existing schedule with the provided information")
-    public ResponseEntity<ScheduleDto> updateSchedule(@PathVariable Long id, @Valid @RequestBody ScheduleDto scheduleDto) {
+    public ResponseEntity<ScheduleDto> updateSchedule(@PathVariable Long id,
+            @Valid @RequestBody ScheduleDto scheduleDto) {
         Optional<Schedule> existingScheduleOpt = scheduleService.getById(id);
         if (existingScheduleOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -79,7 +80,7 @@ public class ScheduleController {
 
         Schedule schedule = ModelMapperConfig.map(scheduleDto, Schedule.class);
         schedule.setCourse(courseOpt.get());
-        
+
         Schedule updatedSchedule = scheduleService.update(id, schedule);
         ScheduleDto updatedScheduleDto = ModelMapperConfig.map(updatedSchedule, ScheduleDto.class);
         return ResponseEntity.ok(updatedScheduleDto);

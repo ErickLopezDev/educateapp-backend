@@ -46,7 +46,7 @@ public class CourseController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping()
     @Operation(summary = "Create a new course", description = "Create a new course with the provided information")
     public ResponseEntity<CourseDto> createCourse(@Valid @RequestBody CourseDto courseDto) {
         // Verify teacher exists
@@ -63,7 +63,7 @@ public class CourseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCourseDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}")
     @Operation(summary = "Update course", description = "Update an existing course with the provided information")
     public ResponseEntity<CourseDto> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseDto courseDto) {
         Optional<Course> existingCourseOpt = courseService.getById(id);

@@ -43,7 +43,7 @@ public class TeacherController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping()
     @Operation(summary = "Create a new teacher", description = "Create a new teacher with the provided information")
     public ResponseEntity<TeacherDto> createTeacher(@Valid @RequestBody TeacherDto teacherDto) {
         Teacher teacher = ModelMapperConfig.map(teacherDto, Teacher.class);
@@ -52,7 +52,7 @@ public class TeacherController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTeacherDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}")
     @Operation(summary = "Update teacher", description = "Update an existing teacher with the provided information")
     public ResponseEntity<TeacherDto> updateTeacher(@PathVariable Long id, @Valid @RequestBody TeacherDto teacherDto) {
         Optional<Teacher> existingTeacherOpt = teacherService.getById(id);

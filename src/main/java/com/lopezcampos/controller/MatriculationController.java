@@ -49,7 +49,7 @@ public class MatriculationController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping()
     @Operation(summary = "Create a new matriculation", description = "Create a new matriculation with the provided information")
     public ResponseEntity<MatriculationDto> createMatriculation(@Valid @RequestBody MatriculationDto matriculationDto) {
         // Verify student exists
@@ -67,15 +67,16 @@ public class MatriculationController {
         Matriculation matriculation = ModelMapperConfig.map(matriculationDto, Matriculation.class);
         matriculation.setStudent(studentOpt.get());
         matriculation.setCourse(courseOpt.get());
-        
+
         Matriculation savedMatriculation = matriculationService.create(matriculation);
         MatriculationDto savedMatriculationDto = ModelMapperConfig.map(savedMatriculation, MatriculationDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedMatriculationDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}")
     @Operation(summary = "Update matriculation", description = "Update an existing matriculation with the provided information")
-    public ResponseEntity<MatriculationDto> updateMatriculation(@PathVariable Long id, @Valid @RequestBody MatriculationDto matriculationDto) {
+    public ResponseEntity<MatriculationDto> updateMatriculation(@PathVariable Long id,
+            @Valid @RequestBody MatriculationDto matriculationDto) {
         Optional<Matriculation> existingMatriculationOpt = matriculationService.getById(id);
         if (existingMatriculationOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -96,7 +97,7 @@ public class MatriculationController {
         Matriculation matriculation = ModelMapperConfig.map(matriculationDto, Matriculation.class);
         matriculation.setStudent(studentOpt.get());
         matriculation.setCourse(courseOpt.get());
-        
+
         Matriculation updatedMatriculation = matriculationService.update(id, matriculation);
         MatriculationDto updatedMatriculationDto = ModelMapperConfig.map(updatedMatriculation, MatriculationDto.class);
         return ResponseEntity.ok(updatedMatriculationDto);

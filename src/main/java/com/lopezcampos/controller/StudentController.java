@@ -43,16 +43,16 @@ public class StudentController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping
+    @PostMapping()
     @Operation(summary = "Create a new student", description = "Create a new student with the provided information")
-    public ResponseEntity<StudentDto> createStudent(@Valid @RequestBody StudentDto studentDto) {
+    public ResponseEntity<StudentDto> createStudentForm(@Valid @RequestBody StudentDto studentDto) {
         Student student = ModelMapperConfig.map(studentDto, Student.class);
         Student savedStudent = studentService.create(student);
         StudentDto savedStudentDto = ModelMapperConfig.map(savedStudent, StudentDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedStudentDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}")
     @Operation(summary = "Update student", description = "Update an existing student with the provided information")
     public ResponseEntity<StudentDto> updateStudent(@PathVariable Long id, @Valid @RequestBody StudentDto studentDto) {
         Optional<Student> existingStudentOpt = studentService.getById(id);
@@ -75,4 +75,5 @@ public class StudentController {
         }
         return ResponseEntity.notFound().build();
     }
+
 }
