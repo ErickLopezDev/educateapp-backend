@@ -2,6 +2,8 @@ package com.lopezcampos.controller;
 
 import java.util.List;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +24,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
 @RestController
 @RequestMapping("/api/schedules")
 @Tag(name = "Schedules")
@@ -32,14 +36,24 @@ public class ScheduleController {
 
     @GetMapping
     @Operation(summary = "Get all schedules")
-    public ResponseEntity<List<ScheduleResponseDto>> getAll() {
-        return ResponseEntity.ok(scheduleService.getAll());
+    public ResponseEntity<CollectionModel<EntityModel<ScheduleResponseDto>>> getAll() {
+        List<EntityModel<ScheduleResponseDto>> schedules = scheduleService.getAll().stream()
+                .map(t -> EntityModel.of(t,
+                        linkTo(methodOn(ScheduleController.class).getById(t.getIdSchedule())).withSelfRel(),
+                        linkTo(methodOn(ScheduleController.class).getAll()).withRel("schedules")))
+                .toList();
+
+        return ResponseEntity.ok(CollectionModel.of(schedules,
+                linkTo(methodOn(ScheduleController.class).getAll()).withSelfRel()));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get schedule by ID")
-    public ResponseEntity<ScheduleResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(scheduleService.getById(id));
+    public ResponseEntity<EntityModel<ScheduleResponseDto>> getById(@PathVariable Long id) {
+        ScheduleResponseDto item = scheduleService.getById(id);
+        return ResponseEntity.ok(EntityModel.of(item,
+                linkTo(methodOn(EvaluationController.class).getById(id)).withSelfRel(),
+                linkTo(methodOn(EvaluationController.class).getAll()).withRel("matriculations")));
     }
 
     @PostMapping

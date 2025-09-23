@@ -1,9 +1,14 @@
 package com.lopezcampos.controller;
 
 import java.util.List;
+
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.lopezcampos.controller.interface_.HateoasHelper;
 import com.lopezcampos.dto.request.EvaluationRequestDto;
 import com.lopezcampos.dto.response.EvaluationResponseDto;
 import com.lopezcampos.service.impl.EvaluationServiceImpl;
@@ -11,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 
 @RestController
 @RequestMapping("/api/evaluations")
@@ -22,14 +28,23 @@ public class EvaluationController {
 
     @GetMapping
     @Operation(summary = "Get all evaluations")
-    public ResponseEntity<List<EvaluationResponseDto>> getAll() {
-        return ResponseEntity.ok(evaluationService.getAll());
+    public ResponseEntity<CollectionModel<EntityModel<EvaluationResponseDto>>> getAll() {
+        return ResponseEntity.ok(
+                HateoasHelper.toCollectionModel(evaluationService.getAll(),
+                        EvaluationResponseDto::getIdEvaluation,
+                        EvaluationController.class)
+        );
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get evaluation by ID")
-    public ResponseEntity<EvaluationResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(evaluationService.getById(id));
+    public ResponseEntity<EntityModel<EvaluationResponseDto>> getById(@PathVariable Long id) {
+        EvaluationResponseDto evaluation = evaluationService.getById(id);
+        return ResponseEntity.ok(
+                HateoasHelper.toModel(evaluation,
+                        EvaluationResponseDto::getIdEvaluation,
+                        EvaluationController.class)
+        );
     }
 
     @PostMapping

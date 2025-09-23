@@ -2,6 +2,8 @@ package com.lopezcampos.controller;
 
 import java.util.List;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lopezcampos.controller.interface_.HateoasHelper;
 import com.lopezcampos.dto.request.MatriculationRequestDto;
+import com.lopezcampos.dto.response.CourseResponseDto;
 import com.lopezcampos.dto.response.MatriculationResponseDto;
 import com.lopezcampos.service.impl.MatriculationServiceImpl;
 
@@ -21,6 +25,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/matriculations")
@@ -32,14 +38,23 @@ public class MatriculationController {
 
     @GetMapping
     @Operation(summary = "Get all matriculations")
-    public ResponseEntity<List<MatriculationResponseDto>> getAll() {
-        return ResponseEntity.ok(matriculationService.getAll());
+    public ResponseEntity<CollectionModel<EntityModel<MatriculationResponseDto>>> getAll() {
+        return ResponseEntity.ok(
+                HateoasHelper.toCollectionModel(matriculationService.getAll(),
+                        MatriculationResponseDto::getIdMatriculation,
+                        MatriculationController.class)
+        );
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get matriculation by ID")
-    public ResponseEntity<MatriculationResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(matriculationService.getById(id));
+    @Operation(summary = "Get course by ID")
+    public ResponseEntity<EntityModel<MatriculationResponseDto>> getById(@PathVariable Long id) {
+        MatriculationResponseDto matriculation = matriculationService.getById(id);
+        return ResponseEntity.ok(
+                HateoasHelper.toModel(matriculation,
+                        MatriculationResponseDto::getIdMatriculation,
+                        CourseController.class)
+        );
     }
 
     @PostMapping

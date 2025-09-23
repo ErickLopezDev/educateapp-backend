@@ -1,7 +1,12 @@
 package com.lopezcampos.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.List;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lopezcampos.controller.interface_.HateoasHelper;
 import com.lopezcampos.dto.request.TeacherRequestDto;
+import com.lopezcampos.dto.response.CourseResponseDto;
 import com.lopezcampos.dto.response.TeacherResponseDto;
 import com.lopezcampos.service.impl.TeacherServiceImpl;
 
@@ -32,14 +39,23 @@ public class TeacherController {
 
     @GetMapping
     @Operation(summary = "Get all teachers")
-    public ResponseEntity<List<TeacherResponseDto>> getAll() {
-        return ResponseEntity.ok(teacherService.getAll());
+    public ResponseEntity<CollectionModel<EntityModel<TeacherResponseDto>>> getAll() {
+        return ResponseEntity.ok(
+                HateoasHelper.toCollectionModel(teacherService.getAll(),
+                        TeacherResponseDto::getIdTeacher,
+                        TeacherController.class)
+        );
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get teacher by ID")
-    public ResponseEntity<TeacherResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(teacherService.getById(id));
+    public ResponseEntity<EntityModel<TeacherResponseDto>> getById(@PathVariable Long id) {
+        TeacherResponseDto teacher = teacherService.getById(id);
+        return ResponseEntity.ok(
+                HateoasHelper.toModel(teacher,
+                        TeacherResponseDto::getIdTeacher,
+                        TeacherController.class)
+        );
     }
 
     @PostMapping

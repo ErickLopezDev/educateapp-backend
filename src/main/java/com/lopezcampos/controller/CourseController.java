@@ -1,5 +1,6 @@
 package com.lopezcampos.controller;
 
+import com.lopezcampos.controller.interface_.HateoasHelper;
 import com.lopezcampos.dto.request.CourseRequestDto;
 import com.lopezcampos.dto.response.CourseResponseDto;
 import com.lopezcampos.service.impl.CourseServiceImpl;
@@ -8,11 +9,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -23,15 +25,24 @@ public class CourseController {
     private final CourseServiceImpl courseService;
 
     @GetMapping
-    @Operation(summary = "Get all courses")    
-    public ResponseEntity<List<CourseResponseDto>> getAll() {
-        return ResponseEntity.ok(courseService.getAll());
+    @Operation(summary = "Get all courses")
+    public ResponseEntity<CollectionModel<EntityModel<CourseResponseDto>>> getAll() {
+        return ResponseEntity.ok(
+                HateoasHelper.toCollectionModel(courseService.getAll(),
+                        CourseResponseDto::getIdCourse,
+                        CourseController.class)
+        );
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get course by ID")
-    public ResponseEntity<CourseResponseDto> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(courseService.getById(id));
+    public ResponseEntity<EntityModel<CourseResponseDto>> getById(@PathVariable Long id) {
+        CourseResponseDto course = courseService.getById(id);
+        return ResponseEntity.ok(
+                HateoasHelper.toModel(course,
+                        CourseResponseDto::getIdCourse,
+                        CourseController.class)
+        );
     }
 
     @PostMapping
