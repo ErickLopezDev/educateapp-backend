@@ -1,4 +1,4 @@
-package com.lopezcampos.dto;
+package com.lopezcampos.dto.schedule;
 
 import lombok.*;
 import java.time.LocalTime;
@@ -8,9 +8,7 @@ import jakarta.validation.constraints.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ScheduleDto {
-    
-    private Long idSchedule;
+public class SchedulePutReqDto {
     
     @NotBlank(message = "Day of week is required")
     @Size(max = 20, message = "Day of week must not exceed 20 characters")

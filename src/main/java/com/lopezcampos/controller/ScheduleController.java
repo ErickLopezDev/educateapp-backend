@@ -1,7 +1,11 @@
 package com.lopezcampos.controller;
 
 import com.lopezcampos.config.ModelMapperConfig;
-import com.lopezcampos.dto.ScheduleDto;
+import com.lopezcampos.dto.schedule.ScheduleDto;
+import com.lopezcampos.dto.schedule.SchedulePostReqDto;
+import com.lopezcampos.dto.schedule.SchedulePutReqDto;
+import com.lopezcampos.dto.response.ApiSuccessResponse;
+import com.lopezcampos.dto.response.ApiErrorResponse;
 import com.lopezcampos.model.Course;
 import com.lopezcampos.model.Schedule;
 import com.lopezcampos.service.interface_.CourseService;
@@ -29,71 +33,140 @@ public class ScheduleController {
 
     @GetMapping
     @Operation(summary = "Get all schedules", description = "Retrieve a list of all schedules")
-    public ResponseEntity<List<ScheduleDto>> getAllSchedules() {
+    public ResponseEntity<ApiSuccessResponse<List<ScheduleDto>>> getAllSchedules() {
         List<Schedule> schedules = scheduleService.getAll();
         List<ScheduleDto> scheduleDtos = ModelMapperConfig.mapList(schedules, ScheduleDto.class);
-        return ResponseEntity.ok(scheduleDtos);
+        
+        ApiSuccessResponse<List<ScheduleDto>> response = ApiSuccessResponse.<List<ScheduleDto>>builder()
+            .message("Schedules retrieved successfully")
+            .data(scheduleDtos)
+            .build();
+            
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get schedule by ID", description = "Retrieve a specific schedule by its ID")
-    public ResponseEntity<ScheduleDto> getScheduleById(@PathVariable Long id) {
+    public ResponseEntity<?> getScheduleById(@PathVariable Long id) {
         Optional<Schedule> scheduleOpt = scheduleService.getById(id);
         if (scheduleOpt.isPresent()) {
             ScheduleDto scheduleDto = ModelMapperConfig.map(scheduleOpt.get(), ScheduleDto.class);
-            return ResponseEntity.ok(scheduleDto);
+            
+            ApiSuccessResponse<ScheduleDto> response = ApiSuccessResponse.<ScheduleDto>builder()
+                .message("Schedule found successfully")
+                .data(scheduleDto)
+                .build();
+                
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.notFound().build();
+        
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+            .message("Schedule not found")
+            .errorType(404)
+            .build();
+            
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @PostMapping()
     @Operation(summary = "Create a new schedule", description = "Create a new schedule with the provided information")
-    public ResponseEntity<ScheduleDto> createSchedule(@Valid @RequestBody ScheduleDto scheduleDto) {
+    public ResponseEntity<?> createSchedule(@Valid @RequestBody SchedulePostReqDto scheduleDto) {
         // Verify course exists
         Optional<Course> courseOpt = courseService.getById(scheduleDto.getCourseId());
         if (courseOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Course not found")
+                .errorType(404)
+                .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
         Schedule schedule = ModelMapperConfig.map(scheduleDto, Schedule.class);
         schedule.setCourse(courseOpt.get());
 
         Schedule savedSchedule = scheduleService.create(schedule);
-        ScheduleDto savedScheduleDto = ModelMapperConfig.map(savedSchedule, ScheduleDto.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedScheduleDto);
+        if (savedSchedule == null) {
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Failed to create schedule")
+                .errorType(500)
+                .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+        
+        ScheduleDto responseDto = ModelMapperConfig.map(savedSchedule, ScheduleDto.class);
+        
+        ApiSuccessResponse<ScheduleDto> response = ApiSuccessResponse.<ScheduleDto>builder()
+            .message("Schedule created successfully")
+            .data(responseDto)
+            .build();
+            
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping(value = "/{id}")
     @Operation(summary = "Update schedule", description = "Update an existing schedule with the provided information")
-    public ResponseEntity<ScheduleDto> updateSchedule(@PathVariable Long id,
-            @Valid @RequestBody ScheduleDto scheduleDto) {
+    public ResponseEntity<?> updateSchedule(@PathVariable Long id, @Valid @RequestBody SchedulePutReqDto scheduleDto) {
         Optional<Schedule> existingScheduleOpt = scheduleService.getById(id);
         if (existingScheduleOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Schedule not found")
+                .errorType(404)
+                .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
         // Verify course exists
         Optional<Course> courseOpt = courseService.getById(scheduleDto.getCourseId());
         if (courseOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Course not found")
+                .errorType(404)
+                .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
         Schedule schedule = ModelMapperConfig.map(scheduleDto, Schedule.class);
         schedule.setCourse(courseOpt.get());
 
         Schedule updatedSchedule = scheduleService.update(id, schedule);
-        ScheduleDto updatedScheduleDto = ModelMapperConfig.map(updatedSchedule, ScheduleDto.class);
-        return ResponseEntity.ok(updatedScheduleDto);
+        if (updatedSchedule == null) {
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Failed to update schedule")
+                .errorType(500)
+                .build();
+            return ResponseEntity.ok(errorResponse);
+        }
+        
+        ScheduleDto responseDto = ModelMapperConfig.map(updatedSchedule, ScheduleDto.class);
+        
+        ApiSuccessResponse<ScheduleDto> response = ApiSuccessResponse.<ScheduleDto>builder()
+            .message("Schedule updated successfully")
+            .data(responseDto)
+            .build();
+            
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete schedule", description = "Delete a schedule by its ID")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
+    public ResponseEntity<?> deleteSchedule(@PathVariable Long id) {
         Optional<Schedule> existingScheduleOpt = scheduleService.getById(id);
         if (existingScheduleOpt.isPresent()) {
             scheduleService.delete(id);
-            return ResponseEntity.noContent().build();
+            
+            ApiSuccessResponse<Boolean> response = ApiSuccessResponse.<Boolean>builder()
+                .message("Schedule deleted successfully")
+                .data(true)
+                .build();
+                
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.notFound().build();
+        
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+            .message("Schedule not found")
+            .errorType(404)
+            .build();
+            
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 }

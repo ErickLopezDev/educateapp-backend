@@ -1,7 +1,11 @@
 package com.lopezcampos.controller;
 
 import com.lopezcampos.config.ModelMapperConfig;
-import com.lopezcampos.dto.TeacherDto;
+import com.lopezcampos.dto.teacher.TeacherDto;
+import com.lopezcampos.dto.teacher.TeacherPostReqDto;
+import com.lopezcampos.dto.teacher.TeacherPatchReqDto;
+import com.lopezcampos.dto.response.ApiSuccessResponse;
+import com.lopezcampos.dto.response.ApiErrorResponse;
 import com.lopezcampos.model.Teacher;
 import com.lopezcampos.service.interface_.TeacherService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,53 +30,124 @@ public class TeacherController {
 
     @GetMapping
     @Operation(summary = "Get all teachers", description = "Retrieve a list of all teachers")
-    public ResponseEntity<List<TeacherDto>> getAllTeachers() {
+    public ResponseEntity<ApiSuccessResponse<List<TeacherDto>>> getAllTeachers() {
         List<Teacher> teachers = teacherService.getAll();
         List<TeacherDto> teacherDtos = ModelMapperConfig.mapList(teachers, TeacherDto.class);
-        return ResponseEntity.ok(teacherDtos);
+
+        ApiSuccessResponse<List<TeacherDto>> response = ApiSuccessResponse.<List<TeacherDto>>builder()
+                .message("Teachers retrieved successfully")
+                .data(teacherDtos)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get teacher by ID", description = "Retrieve a specific teacher by their ID")
-    public ResponseEntity<TeacherDto> getTeacherById(@PathVariable Long id) {
+    public ResponseEntity<?> getTeacherById(@PathVariable Long id) {
         Optional<Teacher> teacherOpt = teacherService.getById(id);
         if (teacherOpt.isPresent()) {
             TeacherDto teacherDto = ModelMapperConfig.map(teacherOpt.get(), TeacherDto.class);
-            return ResponseEntity.ok(teacherDto);
+
+            ApiSuccessResponse<TeacherDto> response = ApiSuccessResponse.<TeacherDto>builder()
+                    .message("Teacher found successfully")
+                    .data(teacherDto)
+                    .build();
+
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.notFound().build();
+
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Teacher not found")
+                .errorType(404)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @PostMapping()
     @Operation(summary = "Create a new teacher", description = "Create a new teacher with the provided information")
-    public ResponseEntity<TeacherDto> createTeacher(@Valid @RequestBody TeacherDto teacherDto) {
+    public ResponseEntity<?> createTeacher(@Valid @RequestBody TeacherPostReqDto teacherDto) {
         Teacher teacher = ModelMapperConfig.map(teacherDto, Teacher.class);
         Teacher savedTeacher = teacherService.create(teacher);
-        TeacherDto savedTeacherDto = ModelMapperConfig.map(savedTeacher, TeacherDto.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTeacherDto);
+
+        if (savedTeacher == null) {
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                    .message("Failed to create teacher")
+                    .errorType(500)
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+
+        TeacherDto responseDto = ModelMapperConfig.map(savedTeacher, TeacherDto.class);
+        ApiSuccessResponse<TeacherDto> response = ApiSuccessResponse.<TeacherDto>builder()
+                .message("Teacher created successfully")
+                .data(responseDto)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping(value = "/{id}")
-    @Operation(summary = "Update teacher", description = "Update an existing teacher with the provided information")
-    public ResponseEntity<TeacherDto> updateTeacher(@PathVariable Long id, @Valid @RequestBody TeacherDto teacherDto) {
+    @PatchMapping("/{id}")
+    @Operation(summary = "Partially update teacher", description = "Update specific fields of an existing teacher")
+    public ResponseEntity<?> patchTeacher(@PathVariable Long id, @RequestBody TeacherPatchReqDto teacherDto) {
         Optional<Teacher> existingTeacherOpt = teacherService.getById(id);
-        if (existingTeacherOpt.isPresent()) {
-            Teacher teacher = ModelMapperConfig.map(teacherDto, Teacher.class);
-            Teacher updatedTeacher = teacherService.update(id, teacher);
-            TeacherDto updatedTeacherDto = ModelMapperConfig.map(updatedTeacher, TeacherDto.class);
-            return ResponseEntity.ok(updatedTeacherDto);
+        if (existingTeacherOpt.isEmpty()) {
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                    .message("Teacher not found")
+                    .errorType(404)
+                    .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        return ResponseEntity.notFound().build();
+
+        Teacher existingTeacher = existingTeacherOpt.get();
+        
+        // PATCH: solo actualiza campos que NO son null
+        if (teacherDto.getName() != null) {
+            existingTeacher.setName(teacherDto.getName());
+        }
+        if (teacherDto.getPhone() != null) {
+            existingTeacher.setPhone(teacherDto.getPhone());
+        }
+        if (teacherDto.getSurname() != null) {
+            existingTeacher.setSurname(teacherDto.getSurname());
+        }
+        if (teacherDto.getStatus() != null) {
+            existingTeacher.setStatus(teacherDto.getStatus());
+        }
+
+
+        Teacher updatedTeacher = teacherService.update(id, existingTeacher);
+        TeacherDto responseDto = ModelMapperConfig.map(updatedTeacher, TeacherDto.class);
+
+        ApiSuccessResponse<TeacherDto> response = ApiSuccessResponse.<TeacherDto>builder()
+                .message("Teacher updated successfully")
+                .data(responseDto)
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete teacher", description = "Delete a teacher by their ID")
-    public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
+    public ResponseEntity<?> deleteTeacher(@PathVariable Long id) {
         Optional<Teacher> existingTeacherOpt = teacherService.getById(id);
         if (existingTeacherOpt.isPresent()) {
             teacherService.delete(id);
-            return ResponseEntity.noContent().build();
+
+            ApiSuccessResponse<Boolean> response = ApiSuccessResponse.<Boolean>builder()
+                    .message("Teacher deleted successfully")
+                    .data(true)
+                    .build();
+
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.notFound().build();
+
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Teacher not found")
+                .errorType(404)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 }

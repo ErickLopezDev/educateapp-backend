@@ -1,7 +1,11 @@
 package com.lopezcampos.controller;
 
 import com.lopezcampos.config.ModelMapperConfig;
-import com.lopezcampos.dto.MatriculationDto;
+import com.lopezcampos.dto.matriculation.MatriculationDto;
+import com.lopezcampos.dto.matriculation.MatriculationPostReqDto;
+import com.lopezcampos.dto.matriculation.MatriculationPutReqDto;
+import com.lopezcampos.dto.response.ApiSuccessResponse;
+import com.lopezcampos.dto.response.ApiErrorResponse;
 import com.lopezcampos.model.Course;
 import com.lopezcampos.model.Matriculation;
 import com.lopezcampos.model.Student;
@@ -32,36 +36,62 @@ public class MatriculationController {
 
     @GetMapping
     @Operation(summary = "Get all matriculations", description = "Retrieve a list of all matriculations")
-    public ResponseEntity<List<MatriculationDto>> getAllMatriculations() {
+    public ResponseEntity<ApiSuccessResponse<List<MatriculationDto>>> getAllMatriculations() {
         List<Matriculation> matriculations = matriculationService.getAll();
         List<MatriculationDto> matriculationDtos = ModelMapperConfig.mapList(matriculations, MatriculationDto.class);
-        return ResponseEntity.ok(matriculationDtos);
+        
+        ApiSuccessResponse<List<MatriculationDto>> response = ApiSuccessResponse.<List<MatriculationDto>>builder()
+            .message("Matriculations retrieved successfully")
+            .data(matriculationDtos)
+            .build();
+            
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get matriculation by ID", description = "Retrieve a specific matriculation by its ID")
-    public ResponseEntity<MatriculationDto> getMatriculationById(@PathVariable Long id) {
+    public ResponseEntity<?> getMatriculationById(@PathVariable Long id) {
         Optional<Matriculation> matriculationOpt = matriculationService.getById(id);
         if (matriculationOpt.isPresent()) {
             MatriculationDto matriculationDto = ModelMapperConfig.map(matriculationOpt.get(), MatriculationDto.class);
-            return ResponseEntity.ok(matriculationDto);
+            
+            ApiSuccessResponse<MatriculationDto> response = ApiSuccessResponse.<MatriculationDto>builder()
+                .message("Matriculation found successfully")
+                .data(matriculationDto)
+                .build();
+                
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.notFound().build();
+        
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+            .message("Matriculation not found")
+            .errorType(404)
+            .build();
+            
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @PostMapping()
     @Operation(summary = "Create a new matriculation", description = "Create a new matriculation with the provided information")
-    public ResponseEntity<MatriculationDto> createMatriculation(@Valid @RequestBody MatriculationDto matriculationDto) {
+    public ResponseEntity<?> createMatriculation(@Valid @RequestBody MatriculationPostReqDto matriculationDto) {
         // Verify student exists
         Optional<Student> studentOpt = studentService.getById(matriculationDto.getStudentId());
         if (studentOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Student not found")
+                .errorType(404)
+                .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
         // Verify course exists
         Optional<Course> courseOpt = courseService.getById(matriculationDto.getCourseId());
         if (courseOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Course not found")
+                .errorType(404)
+                .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
         Matriculation matriculation = ModelMapperConfig.map(matriculationDto, Matriculation.class);
@@ -69,29 +99,54 @@ public class MatriculationController {
         matriculation.setCourse(courseOpt.get());
 
         Matriculation savedMatriculation = matriculationService.create(matriculation);
-        MatriculationDto savedMatriculationDto = ModelMapperConfig.map(savedMatriculation, MatriculationDto.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedMatriculationDto);
+        if (savedMatriculation == null) {
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Failed to create matriculation")
+                .errorType(500)
+                .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+        
+        MatriculationDto responseDto = ModelMapperConfig.map(savedMatriculation, MatriculationDto.class);
+        
+        ApiSuccessResponse<MatriculationDto> response = ApiSuccessResponse.<MatriculationDto>builder()
+            .message("Matriculation created successfully")
+            .data(responseDto)
+            .build();
+            
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping(value = "/{id}")
     @Operation(summary = "Update matriculation", description = "Update an existing matriculation with the provided information")
-    public ResponseEntity<MatriculationDto> updateMatriculation(@PathVariable Long id,
-            @Valid @RequestBody MatriculationDto matriculationDto) {
+    public ResponseEntity<?> updateMatriculation(@PathVariable Long id, @Valid @RequestBody MatriculationPutReqDto matriculationDto) {
         Optional<Matriculation> existingMatriculationOpt = matriculationService.getById(id);
         if (existingMatriculationOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Matriculation not found")
+                .errorType(404)
+                .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
         // Verify student exists
         Optional<Student> studentOpt = studentService.getById(matriculationDto.getStudentId());
         if (studentOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Student not found")
+                .errorType(404)
+                .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
         // Verify course exists
         Optional<Course> courseOpt = courseService.getById(matriculationDto.getCourseId());
         if (courseOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Course not found")
+                .errorType(404)
+                .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
 
         Matriculation matriculation = ModelMapperConfig.map(matriculationDto, Matriculation.class);
@@ -99,18 +154,44 @@ public class MatriculationController {
         matriculation.setCourse(courseOpt.get());
 
         Matriculation updatedMatriculation = matriculationService.update(id, matriculation);
-        MatriculationDto updatedMatriculationDto = ModelMapperConfig.map(updatedMatriculation, MatriculationDto.class);
-        return ResponseEntity.ok(updatedMatriculationDto);
+        if (updatedMatriculation == null) {
+            ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+                .message("Failed to update matriculation")
+                .errorType(500)
+                .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+        
+        MatriculationDto responseDto = ModelMapperConfig.map(updatedMatriculation, MatriculationDto.class);
+        
+        ApiSuccessResponse<MatriculationDto> response = ApiSuccessResponse.<MatriculationDto>builder()
+            .message("Matriculation updated successfully")
+            .data(responseDto)
+            .build();
+            
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete matriculation", description = "Delete a matriculation by its ID")
-    public ResponseEntity<Void> deleteMatriculation(@PathVariable Long id) {
+    public ResponseEntity<?> deleteMatriculation(@PathVariable Long id) {
         Optional<Matriculation> existingMatriculationOpt = matriculationService.getById(id);
         if (existingMatriculationOpt.isPresent()) {
             matriculationService.delete(id);
-            return ResponseEntity.noContent().build();
+            
+            ApiSuccessResponse<Boolean> response = ApiSuccessResponse.<Boolean>builder()
+                .message("Matriculation deleted successfully")
+                .data(true)
+                .build();
+                
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.notFound().build();
+        
+        ApiErrorResponse errorResponse = ApiErrorResponse.builder()
+            .message("Matriculation not found")
+            .errorType(404)
+            .build();
+            
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 }

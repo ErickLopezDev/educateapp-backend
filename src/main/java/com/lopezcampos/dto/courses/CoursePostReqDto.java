@@ -1,4 +1,4 @@
-package com.lopezcampos.dto;
+package com.lopezcampos.dto.courses;
 
 import lombok.*;
 import jakarta.validation.constraints.*;
@@ -7,9 +7,7 @@ import jakarta.validation.constraints.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CourseDto {
-    
-    private Long idCourse;
+public class CoursePostReqDto {
     
     @NotBlank(message = "Name is required")
     @Size(max = 150, message = "Name must not exceed 150 characters")
@@ -30,6 +28,4 @@ public class CourseDto {
     @NotNull(message = "Teacher ID is required")
     private Long teacherId;
     
-    private String teacherName;
-    private String teacherSurname;
 }

@@ -1,4 +1,4 @@
-package com.lopezcampos.dto;
+package com.lopezcampos.dto.evaluation;
 
 import lombok.*;
 import java.time.LocalDate;
@@ -8,15 +8,15 @@ import jakarta.validation.constraints.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EvaluationDto {
+public class EvaluationReqPostDto {
     
-    private Long idEvaluation;
-    
+    @NotBlank(message = "Type evaluation is required")
     @Size(max = 50, message = "Type evaluation must not exceed 50 characters")
     private String typeEvaluation;
     
     private LocalDate date;
     
+    @NotBlank(message = "Grade is required")
     @DecimalMin(value = "0.0", message = "Grade must be at least 0.0")
     @DecimalMax(value = "20.0", message = "Grade must not exceed 20.0")
     private float grade;
@@ -24,9 +24,4 @@ public class EvaluationDto {
     @NotNull(message = "Matriculation ID is required")
     private Long matriculationId;
     
-    // Additional fields for display purposes
-    private String studentName;
-    private String studentSurname;
-    private String courseName;
-    private String courseCode;
 }

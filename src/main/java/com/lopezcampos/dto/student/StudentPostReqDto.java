@@ -1,4 +1,4 @@
-package com.lopezcampos.dto;
+package com.lopezcampos.dto.student;
 
 import lombok.*;
 import java.time.LocalDate;
@@ -8,9 +8,7 @@ import jakarta.validation.constraints.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StudentDto {
-    
-    private Long idStudent;
+public class StudentPostReqDto {
     
     @NotBlank(message = "Name is required")
     @Size(max = 100, message = "Name must not exceed 100 characters")

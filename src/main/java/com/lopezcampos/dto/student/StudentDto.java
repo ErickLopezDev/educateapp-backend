@@ -1,15 +1,16 @@
-package com.lopezcampos.dto;
+package com.lopezcampos.dto.student;
 
 import lombok.*;
+import java.time.LocalDate;
 import jakarta.validation.constraints.*;
 
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TeacherDto {
+public class StudentDto {
     
-    private Long idTeacher;
+    private Long idStudent;
     
     @NotBlank(message = "Name is required")
     @Size(max = 100, message = "Name must not exceed 100 characters")
@@ -31,8 +32,12 @@ public class TeacherDto {
     @Size(max = 20, message = "Phone must not exceed 20 characters")
     private String phone;
     
-    @Size(max = 100, message = "Specialty must not exceed 100 characters")
-    private String specialty;
+    @Size(max = 255, message = "Address must not exceed 255 characters")
+    private String address;
+    
+    private LocalDate birthDate;
+    
+    private LocalDate enrollmentDate;
     
     @Size(max = 20, message = "Status must not exceed 20 characters")
     private String status;
