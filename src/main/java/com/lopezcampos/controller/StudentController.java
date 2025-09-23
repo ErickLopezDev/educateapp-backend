@@ -37,7 +37,12 @@ public class StudentController {
         return ResponseEntity.ok(
                 HateoasHelper.toCollectionModel(studentService.getAll(),
                         StudentResponseDto::getIdStudent,
-                        StudentController.class)
+                        StudentController.class,
+                        "self",       
+                        "create",     
+                        "update",     
+                        "delete"  
+                        )
         );
     }
 
@@ -48,7 +53,12 @@ public class StudentController {
         return ResponseEntity.ok(
                 HateoasHelper.toModel(student,
                         StudentResponseDto::getIdStudent,
-                        StudentController.class)
+                        StudentController.class,
+                        "self",       
+                        "create",     
+                        "update",     
+                        "delete"  
+                        )
         );
     }
     @PostMapping

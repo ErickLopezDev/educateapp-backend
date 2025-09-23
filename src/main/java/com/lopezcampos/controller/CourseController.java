@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/courses")
 @Tag(name = "Courses")
@@ -28,9 +27,15 @@ public class CourseController {
     @Operation(summary = "Get all courses")
     public ResponseEntity<CollectionModel<EntityModel<CourseResponseDto>>> getAll() {
         return ResponseEntity.ok(
-                HateoasHelper.toCollectionModel(courseService.getAll(),
-                        CourseResponseDto::getIdCourse,
-                        CourseController.class)
+            HateoasHelper.toCollectionModel(
+                courseService.getAll(),
+                CourseResponseDto::getIdCourse,
+                CourseController.class,
+                "self",       
+                "create",     
+                "update",    
+                "delete"      
+            )
         );
     }
 
@@ -39,11 +44,18 @@ public class CourseController {
     public ResponseEntity<EntityModel<CourseResponseDto>> getById(@PathVariable Long id) {
         CourseResponseDto course = courseService.getById(id);
         return ResponseEntity.ok(
-                HateoasHelper.toModel(course,
-                        CourseResponseDto::getIdCourse,
-                        CourseController.class)
+            HateoasHelper.toModel(
+                course,
+                CourseResponseDto::getIdCourse,
+                CourseController.class,
+                "self",       
+                "create",     
+                "update",     
+                "delete"     
+            )
         );
     }
+
 
     @PostMapping
     @Operation(summary = "Create a new course")

@@ -29,8 +29,13 @@ public class EvaluationController {
     public ResponseEntity<CollectionModel<EntityModel<EvaluationResponseDto>>> getAll() {
         return ResponseEntity.ok(
                 HateoasHelper.toCollectionModel(evaluationService.getAll(),
-                        EvaluationResponseDto::getIdEvaluation,
-                        EvaluationController.class)
+                    EvaluationResponseDto::getIdEvaluation,
+                    EvaluationController.class,
+                    "self",
+                    "create",
+                    "update",
+                    "detelete"
+                )
         );
     }
 
@@ -40,8 +45,13 @@ public class EvaluationController {
         EvaluationResponseDto evaluation = evaluationService.getById(id);
         return ResponseEntity.ok(
                 HateoasHelper.toModel(evaluation,
-                        EvaluationResponseDto::getIdEvaluation,
-                        EvaluationController.class)
+                    EvaluationResponseDto::getIdEvaluation,
+                    EvaluationController.class,
+                    "self",       
+                    "create",     
+                    "update",     
+                    "delete"  
+                )
         );
     }
 

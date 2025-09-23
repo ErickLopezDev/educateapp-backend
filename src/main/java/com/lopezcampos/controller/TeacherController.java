@@ -37,7 +37,12 @@ public class TeacherController {
         return ResponseEntity.ok(
                 HateoasHelper.toCollectionModel(teacherService.getAll(),
                         TeacherResponseDto::getIdTeacher,
-                        TeacherController.class)
+                        TeacherController.class,
+                        "self",       
+                        "create",     
+                        "update",     
+                        "delete"  
+                        )
         );
     }
 
@@ -48,7 +53,12 @@ public class TeacherController {
         return ResponseEntity.ok(
                 HateoasHelper.toModel(teacher,
                         TeacherResponseDto::getIdTeacher,
-                        TeacherController.class)
+                        TeacherController.class,
+                        "self",       
+                        "create",     
+                        "update",     
+                        "delete"  
+                        )
         );
     }
 

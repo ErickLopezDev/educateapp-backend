@@ -1,7 +1,5 @@
 package com.lopezcampos.controller;
 
-import java.util.List;
-
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lopezcampos.controller.interface_.HateoasHelper;
 import com.lopezcampos.dto.request.MatriculationRequestDto;
-import com.lopezcampos.dto.response.CourseResponseDto;
 import com.lopezcampos.dto.response.MatriculationResponseDto;
 import com.lopezcampos.service.impl.MatriculationServiceImpl;
 
@@ -25,8 +22,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/matriculations")
@@ -42,7 +37,12 @@ public class MatriculationController {
         return ResponseEntity.ok(
                 HateoasHelper.toCollectionModel(matriculationService.getAll(),
                         MatriculationResponseDto::getIdMatriculation,
-                        MatriculationController.class)
+                        MatriculationController.class,
+                        "self",       
+                        "create",     
+                        "update",     
+                        "delete"  
+                        )
         );
     }
 
@@ -53,7 +53,12 @@ public class MatriculationController {
         return ResponseEntity.ok(
                 HateoasHelper.toModel(matriculation,
                         MatriculationResponseDto::getIdMatriculation,
-                        CourseController.class)
+                        CourseController.class,
+                        "self",       
+                        "create",     
+                        "update",     
+                        "delete"  
+                        )
         );
     }
 

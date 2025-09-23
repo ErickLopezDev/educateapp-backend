@@ -33,7 +33,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 public class ScheduleController {
 
     private final ScheduleServiceImpl scheduleService;
-
+    // como se manejaba antes Hateoas, solo getters
     @GetMapping
     @Operation(summary = "Get all schedules")
     public ResponseEntity<CollectionModel<EntityModel<ScheduleResponseDto>>> getAll() {
