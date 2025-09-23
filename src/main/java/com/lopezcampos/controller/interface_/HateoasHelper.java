@@ -31,7 +31,7 @@ public class HateoasHelper {
             model.add(linkTo(controllerClass).slash(id).withRel(getByIdRel));
         }
 
-        // GET all siempre (puedes hacerlo opcional si quieres)
+        // GET all 
         model.add(linkTo(controllerClass).withRel("all"));
 
         // POST / Create
