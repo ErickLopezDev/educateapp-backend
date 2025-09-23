@@ -42,15 +42,16 @@ public abstract class AbstractCrudService<
         return ModelMapperConfig.mapList(repository.findAll(), responseClass);
     }
 
-    @Override
-    public RES update(ID id, REQ requestDto) {
-        if (!repository.existsById(id)) {
-            throw new NotFoundException("Entity not found with id " + id);
+        @Override
+        public RES update(ID id, REQ requestDto) {
+            T entity = repository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Entity not found with id " + id));
+
+            ModelMapperConfig.map(requestDto, entity);
+
+            T updated = repository.save(entity);
+            return ModelMapperConfig.map(updated, responseClass);
         }
-        T entity = ModelMapperConfig.map(requestDto, entityClass);
-        
-        return ModelMapperConfig.map(repository.save(entity), responseClass);
-    }
 
     @Override
     public void delete(ID id) {

@@ -23,4 +23,8 @@ public class ModelMapperConfig {
                 .map(entity -> map(entity, outClass))
                 .collect(Collectors.toList());
     }
+    // Mapear DTO sobre entidad existente
+    public static <T, D> void map(final D sourceDto, T targetEntity) {
+        mapper.map(sourceDto, targetEntity);
+    }
 }
