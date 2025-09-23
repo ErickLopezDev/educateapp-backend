@@ -4,8 +4,8 @@ import com.lopezcampos.config.ModelMapperConfig;
 import com.lopezcampos.dto.courses.CourseDto;
 import com.lopezcampos.dto.courses.CoursePostReqDto;
 import com.lopezcampos.dto.courses.CoursePutReqDto;
-import com.lopezcampos.dto.response.ApiSuccessResponse;
 import com.lopezcampos.dto.response.ApiErrorResponse;
+import com.lopezcampos.dto.response.ApiSuccessResponse;
 import com.lopezcampos.model.Course;
 import com.lopezcampos.model.Teacher;
 import com.lopezcampos.service.interface_.CourseService;
@@ -14,13 +14,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -33,7 +37,7 @@ public class CourseController {
 
     @GetMapping
     @Operation(summary = "Get all courses", description = "Retrieve a list of all courses")
-    public ResponseEntity<ApiSuccessResponse<List<CourseDto>>> getAllCourses() {
+    public ResponseEntity<EntityModel<ApiSuccessResponse<List<CourseDto>>>> getAllCourses() {
         List<Course> courses = courseService.getAll();
         List<CourseDto> courseDtos = ModelMapperConfig.mapList(courses, CourseDto.class);
 
@@ -42,7 +46,13 @@ public class CourseController {
                 .data(courseDtos)
                 .build();
 
-        return ResponseEntity.ok(response);
+        EntityModel<ApiSuccessResponse<List<CourseDto>>> model = wrapSuccessResponse(
+                response,
+                linkTo(methodOn(CourseController.class).getAllCourses()).withSelfRel().withType("GET"),
+                createLink()
+        );
+
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{id}")
@@ -57,7 +67,16 @@ public class CourseController {
                     .data(courseDto)
                     .build();
 
-            return ResponseEntity.ok(response);
+            EntityModel<ApiSuccessResponse<CourseDto>> model = wrapSuccessResponse(
+                    response,
+                    selfLink(id),
+                    collectionLink(),
+                    createLink(),
+                    updateLink(id),
+                    deleteLink(id)
+            );
+
+            return ResponseEntity.ok(model);
         }
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
@@ -65,20 +84,22 @@ public class CourseController {
                 .errorType(404)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
     }
 
-    @PostMapping()
+    @PostMapping
     @Operation(summary = "Create a new course", description = "Create a new course with the provided information")
     public ResponseEntity<?> createCourse(@Valid @RequestBody CoursePostReqDto courseDto) {
-        // Verify teacher exists
         Optional<Teacher> teacherOpt = teacherService.getById(courseDto.getTeacherId());
         if (teacherOpt.isEmpty()) {
             ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                     .message("Teacher not found")
                     .errorType(404)
                     .build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), teachersLink());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
         }
 
         Course course = ModelMapperConfig.map(courseDto, Course.class);
@@ -90,7 +111,8 @@ public class CourseController {
                     .message("Failed to create course")
                     .errorType(500)
                     .build();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorModel);
         }
 
         CourseDto responseDto = ModelMapperConfig.map(savedCourse, CourseDto.class);
@@ -100,7 +122,16 @@ public class CourseController {
                 .data(responseDto)
                 .build();
 
-        return ResponseEntity.ok(response);
+        Long courseId = responseDto.getIdCourse();
+        EntityModel<ApiSuccessResponse<CourseDto>> model = wrapSuccessResponse(
+                response,
+                selfLink(courseId),
+                collectionLink(),
+                updateLink(courseId),
+                deleteLink(courseId)
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
     @PutMapping(value = "/{id}")
@@ -112,17 +143,18 @@ public class CourseController {
                     .message("Course not found")
                     .errorType(404)
                     .build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
         }
 
-        // Verify teacher exists
         Optional<Teacher> teacherOpt = teacherService.getById(courseDto.getTeacherId());
         if (teacherOpt.isEmpty()) {
             ApiErrorResponse errorResponse = ApiErrorResponse.builder()
                     .message("Teacher not found")
                     .errorType(404)
                     .build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), teachersLink());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
         }
 
         Course course = ModelMapperConfig.map(courseDto, Course.class);
@@ -135,7 +167,8 @@ public class CourseController {
                     .message("Failed to update course")
                     .errorType(500)
                     .build();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorModel);
         }
 
         CourseDto responseDto = ModelMapperConfig.map(updatedCourse, CourseDto.class);
@@ -145,7 +178,16 @@ public class CourseController {
                 .data(responseDto)
                 .build();
 
-        return ResponseEntity.ok(response);
+        EntityModel<ApiSuccessResponse<CourseDto>> model = wrapSuccessResponse(
+                response,
+                selfLink(id),
+                collectionLink(),
+                createLink(),
+                updateLink(id),
+                deleteLink(id)
+        );
+
+        return ResponseEntity.ok(model);
     }
 
     @DeleteMapping("/{id}")
@@ -160,7 +202,13 @@ public class CourseController {
                     .data(true)
                     .build();
 
-            return ResponseEntity.ok(response);
+            EntityModel<ApiSuccessResponse<Boolean>> model = wrapSuccessResponse(
+                    response,
+                    collectionLink(),
+                    createLink()
+            );
+
+            return ResponseEntity.ok(model);
         }
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
@@ -168,6 +216,44 @@ public class CourseController {
                 .errorType(404)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
+    }
+
+    private <T> EntityModel<ApiSuccessResponse<T>> wrapSuccessResponse(ApiSuccessResponse<T> response, Link... links) {
+        EntityModel<ApiSuccessResponse<T>> model = EntityModel.of(response);
+        model.add(links);
+        return model;
+    }
+
+    private EntityModel<ApiErrorResponse> wrapErrorResponse(ApiErrorResponse response, Link... links) {
+        EntityModel<ApiErrorResponse> model = EntityModel.of(response);
+        model.add(links);
+        return model;
+    }
+
+    private Link collectionLink() {
+        return linkTo(methodOn(CourseController.class).getAllCourses()).withRel("collection").withType("GET");
+    }
+
+    private Link createLink() {
+        return linkTo(methodOn(CourseController.class).createCourse(null)).withRel("create").withType("POST");
+    }
+
+    private Link teachersLink() {
+        return linkTo(methodOn(TeacherController.class).getAllTeachers()).withRel("teachers").withType("GET");
+    }
+
+    private Link selfLink(Long id) {
+        return linkTo(methodOn(CourseController.class).getCourseById(id)).withSelfRel().withType("GET");
+    }
+
+    private Link updateLink(Long id) {
+        return linkTo(methodOn(CourseController.class).updateCourse(id, null)).withRel("update").withType("PUT");
+    }
+
+    private Link deleteLink(Long id) {
+        return linkTo(methodOn(CourseController.class).deleteCourse(id)).withRel("delete").withType("DELETE");
     }
 }

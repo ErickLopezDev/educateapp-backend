@@ -1,24 +1,28 @@
 package com.lopezcampos.controller;
 
 import com.lopezcampos.config.ModelMapperConfig;
-import com.lopezcampos.dto.teacher.TeacherDto;
-import com.lopezcampos.dto.teacher.TeacherPostReqDto;
-import com.lopezcampos.dto.teacher.TeacherPatchReqDto;
-import com.lopezcampos.dto.response.ApiSuccessResponse;
 import com.lopezcampos.dto.response.ApiErrorResponse;
+import com.lopezcampos.dto.response.ApiSuccessResponse;
+import com.lopezcampos.dto.teacher.TeacherDto;
+import com.lopezcampos.dto.teacher.TeacherPatchReqDto;
+import com.lopezcampos.dto.teacher.TeacherPostReqDto;
 import com.lopezcampos.model.Teacher;
 import com.lopezcampos.service.interface_.TeacherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/teachers")
@@ -30,7 +34,7 @@ public class TeacherController {
 
     @GetMapping
     @Operation(summary = "Get all teachers", description = "Retrieve a list of all teachers")
-    public ResponseEntity<ApiSuccessResponse<List<TeacherDto>>> getAllTeachers() {
+    public ResponseEntity<EntityModel<ApiSuccessResponse<List<TeacherDto>>>> getAllTeachers() {
         List<Teacher> teachers = teacherService.getAll();
         List<TeacherDto> teacherDtos = ModelMapperConfig.mapList(teachers, TeacherDto.class);
 
@@ -39,7 +43,13 @@ public class TeacherController {
                 .data(teacherDtos)
                 .build();
 
-        return ResponseEntity.ok(response);
+        EntityModel<ApiSuccessResponse<List<TeacherDto>>> model = wrapSuccessResponse(
+                response,
+                linkTo(methodOn(TeacherController.class).getAllTeachers()).withSelfRel().withType("GET"),
+                createLink()
+        );
+
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{id}")
@@ -54,7 +64,16 @@ public class TeacherController {
                     .data(teacherDto)
                     .build();
 
-            return ResponseEntity.ok(response);
+            EntityModel<ApiSuccessResponse<TeacherDto>> model = wrapSuccessResponse(
+                    response,
+                    selfLink(id),
+                    collectionLink(),
+                    createLink(),
+                    updateLink(id),
+                    deleteLink(id)
+            );
+
+            return ResponseEntity.ok(model);
         }
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
@@ -62,10 +81,12 @@ public class TeacherController {
                 .errorType(404)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
     }
 
-    @PostMapping()
+    @PostMapping
     @Operation(summary = "Create a new teacher", description = "Create a new teacher with the provided information")
     public ResponseEntity<?> createTeacher(@Valid @RequestBody TeacherPostReqDto teacherDto) {
         Teacher teacher = ModelMapperConfig.map(teacherDto, Teacher.class);
@@ -76,7 +97,8 @@ public class TeacherController {
                     .message("Failed to create teacher")
                     .errorType(500)
                     .build();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorModel);
         }
 
         TeacherDto responseDto = ModelMapperConfig.map(savedTeacher, TeacherDto.class);
@@ -85,7 +107,16 @@ public class TeacherController {
                 .data(responseDto)
                 .build();
 
-        return ResponseEntity.ok(response);
+        Long teacherId = responseDto.getIdTeacher();
+        EntityModel<ApiSuccessResponse<TeacherDto>> model = wrapSuccessResponse(
+                response,
+                selfLink(teacherId),
+                collectionLink(),
+                updateLink(teacherId),
+                deleteLink(teacherId)
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
     @PatchMapping("/{id}")
@@ -97,12 +128,12 @@ public class TeacherController {
                     .message("Teacher not found")
                     .errorType(404)
                     .build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
         }
 
         Teacher existingTeacher = existingTeacherOpt.get();
-        
-        // PATCH: solo actualiza campos que NO son null
+
         if (teacherDto.getName() != null) {
             existingTeacher.setName(teacherDto.getName());
         }
@@ -116,7 +147,6 @@ public class TeacherController {
             existingTeacher.setStatus(teacherDto.getStatus());
         }
 
-
         Teacher updatedTeacher = teacherService.update(id, existingTeacher);
         TeacherDto responseDto = ModelMapperConfig.map(updatedTeacher, TeacherDto.class);
 
@@ -125,7 +155,16 @@ public class TeacherController {
                 .data(responseDto)
                 .build();
 
-        return ResponseEntity.ok(response);
+        EntityModel<ApiSuccessResponse<TeacherDto>> model = wrapSuccessResponse(
+                response,
+                selfLink(id),
+                collectionLink(),
+                createLink(),
+                updateLink(id),
+                deleteLink(id)
+        );
+
+        return ResponseEntity.ok(model);
     }
 
     @DeleteMapping("/{id}")
@@ -140,7 +179,13 @@ public class TeacherController {
                     .data(true)
                     .build();
 
-            return ResponseEntity.ok(response);
+            EntityModel<ApiSuccessResponse<Boolean>> model = wrapSuccessResponse(
+                    response,
+                    collectionLink(),
+                    createLink()
+            );
+
+            return ResponseEntity.ok(model);
         }
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
@@ -148,6 +193,40 @@ public class TeacherController {
                 .errorType(404)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
+    }
+
+    private <T> EntityModel<ApiSuccessResponse<T>> wrapSuccessResponse(ApiSuccessResponse<T> response, Link... links) {
+        EntityModel<ApiSuccessResponse<T>> model = EntityModel.of(response);
+        model.add(links);
+        return model;
+    }
+
+    private EntityModel<ApiErrorResponse> wrapErrorResponse(ApiErrorResponse response, Link... links) {
+        EntityModel<ApiErrorResponse> model = EntityModel.of(response);
+        model.add(links);
+        return model;
+    }
+
+    private Link collectionLink() {
+        return linkTo(methodOn(TeacherController.class).getAllTeachers()).withRel("collection").withType("GET");
+    }
+
+    private Link createLink() {
+        return linkTo(methodOn(TeacherController.class).createTeacher(null)).withRel("create").withType("POST");
+    }
+
+    private Link selfLink(Long id) {
+        return linkTo(methodOn(TeacherController.class).getTeacherById(id)).withSelfRel().withType("GET");
+    }
+
+    private Link updateLink(Long id) {
+        return linkTo(methodOn(TeacherController.class).patchTeacher(id, null)).withRel("update").withType("PATCH");
+    }
+
+    private Link deleteLink(Long id) {
+        return linkTo(methodOn(TeacherController.class).deleteTeacher(id)).withRel("delete").withType("DELETE");
     }
 }

@@ -1,24 +1,28 @@
 package com.lopezcampos.controller;
 
 import com.lopezcampos.config.ModelMapperConfig;
+import com.lopezcampos.dto.response.ApiErrorResponse;
+import com.lopezcampos.dto.response.ApiSuccessResponse;
 import com.lopezcampos.dto.student.StudentDto;
 import com.lopezcampos.dto.student.StudentPatchReqDto;
 import com.lopezcampos.dto.student.StudentPostReqDto;
-import com.lopezcampos.dto.response.ApiSuccessResponse;
-import com.lopezcampos.dto.response.ApiErrorResponse;
 import com.lopezcampos.model.Student;
 import com.lopezcampos.service.interface_.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/students")
@@ -30,7 +34,7 @@ public class StudentController {
 
     @GetMapping
     @Operation(summary = "Get all students", description = "Retrieve a list of all students")
-    public ResponseEntity<ApiSuccessResponse<List<StudentDto>>> getAllStudents() {
+    public ResponseEntity<EntityModel<ApiSuccessResponse<List<StudentDto>>>> getAllStudents() {
         List<Student> students = studentService.getAll();
         List<StudentDto> studentDtos = ModelMapperConfig.mapList(students, StudentDto.class);
 
@@ -39,7 +43,13 @@ public class StudentController {
                 .data(studentDtos)
                 .build();
 
-        return ResponseEntity.ok(response);
+        EntityModel<ApiSuccessResponse<List<StudentDto>>> model = wrapSuccessResponse(
+                response,
+                linkTo(methodOn(StudentController.class).getAllStudents()).withSelfRel().withType("GET"),
+                createLink()
+        );
+
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{id}")
@@ -54,7 +64,16 @@ public class StudentController {
                     .data(studentDto)
                     .build();
 
-            return ResponseEntity.ok(response);
+            EntityModel<ApiSuccessResponse<StudentDto>> model = wrapSuccessResponse(
+                    response,
+                    selfLink(id),
+                    collectionLink(),
+                    createLink(),
+                    updateLink(id),
+                    deleteLink(id)
+            );
+
+            return ResponseEntity.ok(model);
         }
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
@@ -62,10 +81,12 @@ public class StudentController {
                 .errorType(404)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
     }
 
-    @PostMapping()
+    @PostMapping
     @Operation(summary = "Create a new student", description = "Create a new student with the provided information")
     public ResponseEntity<?> createStudentForm(@Valid @RequestBody StudentPostReqDto studentDto) {
         Student student = ModelMapperConfig.map(studentDto, Student.class);
@@ -76,7 +97,8 @@ public class StudentController {
                     .message("Failed to create student")
                     .errorType(500)
                     .build();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorModel);
         }
 
         StudentDto responseDto = ModelMapperConfig.map(savedStudent, StudentDto.class);
@@ -85,7 +107,16 @@ public class StudentController {
                 .data(responseDto)
                 .build();
 
-        return ResponseEntity.ok(response);
+        Long studentId = responseDto.getIdStudent();
+        EntityModel<ApiSuccessResponse<StudentDto>> model = wrapSuccessResponse(
+                response,
+                selfLink(studentId),
+                collectionLink(),
+                updateLink(studentId),
+                deleteLink(studentId)
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(model);
     }
 
     @PatchMapping(value = "/{id}")
@@ -97,12 +128,12 @@ public class StudentController {
                     .message("Student not found")
                     .errorType(404)
                     .build();
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
         }
 
         Student existingStudent = existingStudentOpt.get();
 
-        // PATCH: solo actualiza campos que NO son null
         if (studentDto.getName() != null) {
             existingStudent.setName(studentDto.getName());
         }
@@ -127,7 +158,16 @@ public class StudentController {
                 .data(responseDto)
                 .build();
 
-        return ResponseEntity.ok(response);
+        EntityModel<ApiSuccessResponse<StudentDto>> model = wrapSuccessResponse(
+                response,
+                selfLink(id),
+                collectionLink(),
+                createLink(),
+                updateLink(id),
+                deleteLink(id)
+        );
+
+        return ResponseEntity.ok(model);
     }
 
     @DeleteMapping("/{id}")
@@ -142,7 +182,13 @@ public class StudentController {
                     .data(true)
                     .build();
 
-            return ResponseEntity.ok(response);
+            EntityModel<ApiSuccessResponse<Boolean>> model = wrapSuccessResponse(
+                    response,
+                    collectionLink(),
+                    createLink()
+            );
+
+            return ResponseEntity.ok(model);
         }
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
@@ -150,7 +196,40 @@ public class StudentController {
                 .errorType(404)
                 .build();
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        EntityModel<ApiErrorResponse> errorModel = wrapErrorResponse(errorResponse, collectionLink(), createLink());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorModel);
     }
 
+    private <T> EntityModel<ApiSuccessResponse<T>> wrapSuccessResponse(ApiSuccessResponse<T> response, Link... links) {
+        EntityModel<ApiSuccessResponse<T>> model = EntityModel.of(response);
+        model.add(links);
+        return model;
+    }
+
+    private EntityModel<ApiErrorResponse> wrapErrorResponse(ApiErrorResponse response, Link... links) {
+        EntityModel<ApiErrorResponse> model = EntityModel.of(response);
+        model.add(links);
+        return model;
+    }
+
+    private Link collectionLink() {
+        return linkTo(methodOn(StudentController.class).getAllStudents()).withRel("collection").withType("GET");
+    }
+
+    private Link createLink() {
+        return linkTo(methodOn(StudentController.class).createStudentForm(null)).withRel("create").withType("POST");
+    }
+
+    private Link selfLink(Long id) {
+        return linkTo(methodOn(StudentController.class).getStudentById(id)).withSelfRel().withType("GET");
+    }
+
+    private Link updateLink(Long id) {
+        return linkTo(methodOn(StudentController.class).patchStudent(id, null)).withRel("update").withType("PATCH");
+    }
+
+    private Link deleteLink(Long id) {
+        return linkTo(methodOn(StudentController.class).deleteStudent(id)).withRel("delete").withType("DELETE");
+    }
 }
