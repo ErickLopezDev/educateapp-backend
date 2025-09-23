@@ -1,10 +1,5 @@
 package com.lopezcampos.controller;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-import java.util.List;
-
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -20,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lopezcampos.controller.interface_.HateoasHelper;
 import com.lopezcampos.dto.request.TeacherRequestDto;
-import com.lopezcampos.dto.response.CourseResponseDto;
 import com.lopezcampos.dto.response.TeacherResponseDto;
 import com.lopezcampos.service.impl.TeacherServiceImpl;
 

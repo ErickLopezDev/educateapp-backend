@@ -1,7 +1,5 @@
 package com.lopezcampos.controller;
 
-import java.util.List;
-
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
@@ -18,15 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lopezcampos.controller.interface_.HateoasHelper;
 import com.lopezcampos.dto.request.StudentRequestDto;
 import com.lopezcampos.dto.response.StudentResponseDto;
-import com.lopezcampos.dto.response.TeacherResponseDto;
 import com.lopezcampos.service.impl.StudentServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
 @RequestMapping("/api/students")

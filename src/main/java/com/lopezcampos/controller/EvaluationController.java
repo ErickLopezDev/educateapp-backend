@@ -1,7 +1,5 @@
 package com.lopezcampos.controller;
 
-import java.util.List;
-
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
